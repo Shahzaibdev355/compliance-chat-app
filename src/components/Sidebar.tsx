@@ -48,10 +48,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300`}>
+    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out`}>
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && <h2 className="text-lg font-semibold">Taxtro AI</h2>}
+        {!collapsed && <h2 className="text-lg font-semibold transition-opacity duration-300 animate-fade-in">Taxtro AI</h2>}
         {onToggleCollapse && (
           <Button
             variant="ghost"
@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Dual Mode Access */}
         <div className="space-y-2 mb-6">
           {!collapsed && (
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in">
               AI Modes
             </h3>
           )}
@@ -80,7 +80,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             title={collapsed ? "Normal GPT" : undefined}
           >
             <Bot className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-            {!collapsed && "Normal GPT"}
+            {!collapsed && <span className="animate-fade-in">Normal GPT</span>}
           </Button>
           <Button
             variant={currentMode === 'agent' ? 'default' : 'ghost'}
@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             title={collapsed ? "Agent Andrew" : undefined}
           >
             <FileCheck className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-            {!collapsed && "Agent Andrew"}
+            {!collapsed && <span className="animate-fade-in">Agent Andrew</span>}
           </Button>
         </div>
 
@@ -97,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {currentMode === 'chat' && (
           <div className="space-y-2 mb-6">
             {!collapsed && (
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in">
                 Chat
               </h3>
             )}
@@ -108,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               title={collapsed ? "New Chat" : undefined}
             >
               <MessageSquare className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-              {!collapsed && "New Chat"}
+              {!collapsed && <span className="animate-fade-in">New Chat</span>}
             </Button>
             <Button
               variant="ghost"
@@ -117,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               title={collapsed ? "Search Chat" : undefined}
             >
               <Search className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-              {!collapsed && "Search Chat"}
+              {!collapsed && <span className="animate-fade-in">Search Chat</span>}
             </Button>
           </div>
         )}
@@ -125,7 +125,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Library */}
         <div className="space-y-2 mb-6">
           {!collapsed && (
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in">
               Documents
             </h3>
           )}
@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             title={collapsed ? "Library" : undefined}
           >
             <FileText className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-            {!collapsed && "Library"}
+            {!collapsed && <span className="animate-fade-in">Library</span>}
           </Button>
         </div>
       </div>
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           ) : (
             <Sun className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
           )}
-          {!collapsed && (theme === 'light' ? 'Dark Mode' : 'Light Mode')}
+          {!collapsed && <span className="animate-fade-in">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
         </Button>
 
         {/* User Profile */}
@@ -166,7 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           title={collapsed ? "Profile" : undefined}
         >
           <User className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-          {!collapsed && "Profile"}
+          {!collapsed && <span className="animate-fade-in">Profile</span>}
         </Button>
 
         {showProfile && !collapsed && (
@@ -185,7 +185,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           title={collapsed ? "Logout" : undefined}
         >
           <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-          {!collapsed && "Logout"}
+          {!collapsed && <span className="animate-fade-in">Logout</span>}
         </Button>
       </div>
     </div>
