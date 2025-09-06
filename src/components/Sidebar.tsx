@@ -10,7 +10,9 @@ import {
   Sun,
   Moon,
   Bot,
-  FileCheck
+  FileCheck,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,6 +21,8 @@ interface SidebarProps {
   onAccessAgent: () => void;
   onLogout: () => void;
   currentMode: 'gpt' | 'agent' | 'chat';
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -26,7 +30,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onAccessGPT,
   onAccessAgent,
   onLogout,
-  currentMode
+  currentMode,
+  collapsed = false,
+  onToggleCollapse
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [showProfile, setShowProfile] = useState(false);
@@ -42,74 +48,95 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className="w-64 bg-sidebar-background border-r border-border flex flex-col h-full">
+    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300`}>
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold">Taxtro AI</h2>
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        {!collapsed && <h2 className="text-lg font-semibold">Taxtro AI</h2>}
+        {onToggleCollapse && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleCollapse}
+            className="ml-auto"
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        )}
       </div>
 
       {/* Main Actions */}
       <div className="flex-1 p-4 space-y-2">
         {/* Dual Mode Access */}
         <div className="space-y-2 mb-6">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            AI Modes
-          </h3>
+          {!collapsed && (
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              AI Modes
+            </h3>
+          )}
           <Button
             variant={currentMode === 'gpt' ? 'default' : 'ghost'}
-            className="w-full justify-start"
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
             onClick={onAccessGPT}
+            title={collapsed ? "Normal GPT" : undefined}
           >
-            <Bot className="mr-3 h-4 w-4" />
-            Normal GPT
+            <Bot className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+            {!collapsed && "Normal GPT"}
           </Button>
           <Button
             variant={currentMode === 'agent' ? 'default' : 'ghost'}
-            className="w-full justify-start"
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
             onClick={onAccessAgent}
+            title={collapsed ? "Agent Andrew" : undefined}
           >
-            <FileCheck className="mr-3 h-4 w-4" />
-            Agent Andrew
+            <FileCheck className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+            {!collapsed && "Agent Andrew"}
           </Button>
         </div>
 
         {/* Chat Actions */}
         {currentMode === 'chat' && (
           <div className="space-y-2 mb-6">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Chat
-            </h3>
+            {!collapsed && (
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Chat
+              </h3>
+            )}
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
               onClick={onNewChat}
+              title={collapsed ? "New Chat" : undefined}
             >
-              <MessageSquare className="mr-3 h-4 w-4" />
-              New Chat
+              <MessageSquare className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+              {!collapsed && "New Chat"}
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
               onClick={handleSearchChat}
+              title={collapsed ? "Search Chat" : undefined}
             >
-              <Search className="mr-3 h-4 w-4" />
-              Search Chat
+              <Search className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+              {!collapsed && "Search Chat"}
             </Button>
           </div>
         )}
 
         {/* Library */}
         <div className="space-y-2 mb-6">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Documents
-          </h3>
+          {!collapsed && (
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Documents
+            </h3>
+          )}
           <Button
             variant="ghost"
-            className="w-full justify-start"
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
             onClick={handleLibrary}
+            title={collapsed ? "Library" : undefined}
           >
-            <FileText className="mr-3 h-4 w-4" />
-            Library
+            <FileText className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+            {!collapsed && "Library"}
           </Button>
         </div>
       </div>
@@ -119,28 +146,30 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Theme Switcher */}
         <Button
           variant="ghost"
-          className="w-full justify-start"
+          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
           onClick={toggleTheme}
+          title={collapsed ? (theme === 'light' ? 'Dark Mode' : 'Light Mode') : undefined}
         >
           {theme === 'light' ? (
-            <Moon className="mr-3 h-4 w-4" />
+            <Moon className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
           ) : (
-            <Sun className="mr-3 h-4 w-4" />
+            <Sun className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
           )}
-          {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+          {!collapsed && (theme === 'light' ? 'Dark Mode' : 'Light Mode')}
         </Button>
 
         {/* User Profile */}
         <Button
           variant="ghost"
-          className="w-full justify-start"
+          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
           onClick={() => setShowProfile(!showProfile)}
+          title={collapsed ? "Profile" : undefined}
         >
-          <User className="mr-3 h-4 w-4" />
-          Profile
+          <User className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+          {!collapsed && "Profile"}
         </Button>
 
-        {showProfile && (
+        {showProfile && !collapsed && (
           <div className="ml-7 text-sm text-muted-foreground space-y-1 fade-in">
             <p>John Doe</p>
             <p>john@example.com</p>
@@ -151,11 +180,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Logout */}
         <Button
           variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive"
+          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} text-destructive hover:text-destructive`}
           onClick={onLogout}
+          title={collapsed ? "Logout" : undefined}
         >
-          <LogOut className="mr-3 h-4 w-4" />
-          Logout
+          <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+          {!collapsed && "Logout"}
         </Button>
       </div>
     </div>

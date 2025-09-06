@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ChatInterface from '@/components/ChatInterface';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Crown, Send } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -17,6 +21,9 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMode, setCurrentMode] = useState<'gpt' | 'agent' | 'chat'>('gpt');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [centeredInput, setCenteredInput] = useState('');
+  const [selectedModel, setSelectedModel] = useState('gpt-4');
 
   const handleNewChat = () => {
     setMessages([]);
@@ -24,15 +31,21 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
   };
 
   const handleAccessGPT = () => {
-    setCurrentMode('chat');
-    if (messages.length === 0) {
-      const welcomeMessage: Message = {
-        id: '1',
-        type: 'ai',
-        content: 'Hello! I\'m your AI assistant for tax compliance and advisory. How can I help you today?',
-        timestamp: new Date()
-      };
-      setMessages([welcomeMessage]);
+    setCurrentMode('gpt');
+    setMessages([]);
+  };
+
+  const handleBackToWelcome = () => {
+    setCurrentMode('gpt');
+    setMessages([]);
+  };
+
+  const handleCenteredSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (centeredInput.trim()) {
+      handleSendMessage(centeredInput.trim());
+      setCenteredInput('');
+      setCurrentMode('chat');
     }
   };
 
@@ -58,6 +71,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
     }, 1000);
   };
 
+  // Welcome Screen (First Load)
   if (currentMode === 'gpt' && messages.length === 0) {
     return (
       <div className="flex h-screen">
@@ -67,32 +81,73 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
           onAccessAgent={onAccessAgent}
           onLogout={onLogout}
           currentMode={currentMode}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-6 max-w-md">
-            <h2 className="text-3xl font-bold">Welcome to Taxtro AI</h2>
-            <p className="text-muted-foreground text-lg">
-              Choose how you'd like to interact with our AI system
-            </p>
-            <div className="space-y-4">
-              <button
-                onClick={handleAccessGPT}
-                className="w-full p-6 bg-card border border-border rounded-xl hover:bg-muted transition-colors text-left"
-              >
-                <h3 className="font-semibold mb-2">Access Normal GPT</h3>
-                <p className="text-sm text-muted-foreground">
-                  Standard chat Q&A mode for general tax questions and advice
+        <div className="flex-1 flex flex-col">
+          {/* Upgrade Banner */}
+          <div className="border-b border-border p-4">
+            <Button
+              variant="outline"
+              className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:from-primary/20 hover:to-accent/20 transition-all duration-300"
+              onClick={() => console.log('Upgrade clicked')}
+            >
+              <Crown className="h-4 w-4 text-primary" />
+              <span className="font-medium">Upgrade your plan</span>
+            </Button>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center space-y-8 max-w-2xl px-6">
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold">What are you working on today?</h1>
+                <p className="text-muted-foreground text-lg">
+                  Choose how you'd like to interact with our AI system
                 </p>
-              </button>
-              <button
-                onClick={onAccessAgent}
-                className="w-full p-6 bg-card border border-border rounded-xl hover:bg-muted transition-colors text-left"
-              >
-                <h3 className="font-semibold mb-2">Access Agent Andrew</h3>
-                <p className="text-sm text-muted-foreground">
-                  Dedicated document compliance analysis with Income Tax law validation
-                </p>
-              </button>
+              </div>
+              
+              {/* Centered Input */}
+              <form onSubmit={handleCenteredSubmit} className="w-full max-w-2xl">
+                <div className="relative">
+                  <Input
+                    value={centeredInput}
+                    onChange={(e) => setCenteredInput(e.target.value)}
+                    placeholder="Ask me anything about tax compliance..."
+                    className="w-full h-14 pl-6 pr-14 text-lg rounded-xl border-2 focus:border-primary transition-all duration-300"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!centeredInput.trim()}
+                    className="absolute right-2 top-2 h-10 w-10 rounded-lg"
+                    size="sm"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+
+              {/* Mode Selection Cards */}
+              <div className="grid md:grid-cols-2 gap-4 mt-8">
+                <button
+                  onClick={handleAccessGPT}
+                  className="p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
+                >
+                  <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Access Normal GPT</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Standard chat Q&A mode for general tax questions and advice
+                  </p>
+                </button>
+                <button
+                  onClick={onAccessAgent}
+                  className="p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
+                >
+                  <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Access Agent Andrew</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Dedicated document compliance analysis with Income Tax law validation
+                  </p>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -100,6 +155,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
     );
   }
 
+  // Chat Mode
   return (
     <div className="flex h-screen">
       <Sidebar
@@ -108,11 +164,53 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
         onAccessAgent={onAccessAgent}
         onLogout={onLogout}
         currentMode={currentMode}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <ChatInterface
-        messages={messages}
-        onSendMessage={handleSendMessage}
-      />
+      <div className="flex-1 flex flex-col">
+        {/* Upgrade Banner */}
+        <div className="border-b border-border p-4">
+          <Button
+            variant="outline"
+            className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:from-primary/20 hover:to-accent/20 transition-all duration-300"
+            onClick={() => console.log('Upgrade clicked')}
+          >
+            <Crown className="h-4 w-4 text-primary" />
+            <span className="font-medium">Upgrade your plan</span>
+          </Button>
+        </div>
+
+        {/* Chat Header with Model Dropdown and Back Button */}
+        <div className="border-b border-border p-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToWelcome}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
+                <SelectItem value="gpt-4">GPT-4</SelectItem>
+                <SelectItem value="custom">Custom Model</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <ChatInterface
+          messages={messages}
+          onSendMessage={handleSendMessage}
+        />
+      </div>
     </div>
   );
 };

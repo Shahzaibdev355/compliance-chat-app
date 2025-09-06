@@ -149,6 +149,10 @@
     animation: fadeIn 0.2s ease-out forwards;
   }
   
+  .slide-down {
+    animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  
   .typewriter {
     overflow: hidden;
     border-right: 2px solid;
@@ -192,6 +196,17 @@
 @keyframes typewriter {
   to {
     width: 100%;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50vh);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
