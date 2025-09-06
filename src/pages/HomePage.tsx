@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ChatInterface from '@/components/ChatInterface';
+import PlusButton from '@/components/PlusButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Crown, Send } from 'lucide-react';
+import { ArrowLeft, Crown, Send, Mic, Plus, FileText, Search } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -110,20 +111,34 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onLogout }) => {
               {/* Centered Input */}
               <form onSubmit={handleCenteredSubmit} className="w-full max-w-2xl">
                 <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+                    <PlusButton onAddDocument={() => console.log('Add document')} onDeepSearch={() => console.log('Deep search')} />
+                  </div>
                   <Input
                     value={centeredInput}
                     onChange={(e) => setCenteredInput(e.target.value)}
                     placeholder="Ask me anything about tax compliance..."
-                    className="w-full h-14 pl-6 pr-14 text-lg rounded-xl border-2 focus:border-primary transition-all duration-300"
+                    className="w-full h-14 pl-14 pr-24 text-lg rounded-xl border-2 focus:border-primary transition-all duration-300"
                   />
-                  <Button
-                    type="submit"
-                    disabled={!centeredInput.trim()}
-                    className="absolute right-2 top-2 h-10 w-10 rounded-lg"
-                    size="sm"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 rounded-lg"
+                      onClick={() => console.log('Voice input')}
+                    >
+                      <Mic className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={!centeredInput.trim()}
+                      className="h-8 w-8 rounded-lg"
+                      size="sm"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </form>
 
