@@ -46,18 +46,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out`}>
+    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out transform`}>
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && <h2 className="text-lg font-semibold transition-opacity duration-300 animate-fade-in">Taxtro AI</h2>}
+        {!collapsed && <h2 className="text-lg font-semibold animate-fade-in transition-opacity duration-300 ease-in-out delay-75">Taxtro AI</h2>}
         {onToggleCollapse && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onToggleCollapse}
-            className="ml-auto"
+            className="ml-auto transition-all duration-300 ease-in-out"
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? <ChevronRight className="h-4 w-4 transition-transform duration-300 ease-in-out" /> : <ChevronLeft className="h-4 w-4 transition-transform duration-300 ease-in-out" />}
           </Button>
         )}
       </div>
@@ -67,74 +67,74 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Dual Mode Access */}
         <div className="space-y-2 mb-6">
           {!collapsed && (
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in transition-opacity duration-300 ease-in-out delay-75">
               AI Modes
             </h3>
           )}
           <Button
             variant={currentMode === 'gpt' ? 'default' : 'ghost'}
-            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
             onClick={onAccessGPT}
             title={collapsed ? "Normal GPT" : undefined}
           >
-            <Bot className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-            {!collapsed && <span className="animate-fade-in">Normal GPT</span>}
+            <Bot className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+            {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Normal GPT</span>}
           </Button>
           <Button
             variant={currentMode === 'agent' ? 'default' : 'ghost'}
-            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
             onClick={onAccessAgent}
             title={collapsed ? "Agent Andrew" : undefined}
           >
-            <FileCheck className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-            {!collapsed && <span className="animate-fade-in">Agent Andrew</span>}
+            <FileCheck className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+            {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Agent Andrew</span>}
           </Button>
         </div>
 
-        {/* Chat Actions */}
-        {currentMode === 'chat' && (
-          <div className="space-y-2 mb-6">
-            {!collapsed && (
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in">
-                Chat
-              </h3>
-            )}
+        {/* Chat Actions - Always Visible */}
+        <div className="space-y-2 mb-6">
+          {!collapsed && (
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in transition-opacity duration-300 ease-in-out">
+              Chat
+            </h3>
+          )}
+          {currentMode === 'chat' && (
             <Button
               variant="ghost"
-              className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+              className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
               onClick={onNewChat}
               title={collapsed ? "New Chat" : undefined}
             >
-              <MessageSquare className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-              {!collapsed && <span className="animate-fade-in">New Chat</span>}
+              <MessageSquare className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+              {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">New Chat</span>}
             </Button>
-            <Button
-              variant="ghost"
-              className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
-              onClick={handleSearchChat}
-              title={collapsed ? "Search Chat" : undefined}
-            >
-              <Search className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-              {!collapsed && <span className="animate-fade-in">Search Chat</span>}
-            </Button>
-          </div>
-        )}
+          )}
+          <Button
+            variant="ghost"
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
+            onClick={handleSearchChat}
+            title={collapsed ? "Search Chat" : undefined}
+          >
+            <Search className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+            {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Search Chat</span>}
+          </Button>
+        </div>
 
         {/* Library */}
         <div className="space-y-2 mb-6">
           {!collapsed && (
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in transition-opacity duration-300 ease-in-out delay-75">
               Documents
             </h3>
           )}
           <Button
             variant="ghost"
-            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+            className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
             onClick={onAccessLibrary}
             title={collapsed ? "Library" : undefined}
           >
-            <FileText className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-            {!collapsed && <span className="animate-fade-in">Library</span>}
+            <FileText className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+            {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Library</span>}
           </Button>
         </div>
       </div>
@@ -144,31 +144,31 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Theme Switcher */}
         <Button
           variant="ghost"
-          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
           onClick={toggleTheme}
           title={collapsed ? (theme === 'light' ? 'Dark Mode' : 'Light Mode') : undefined}
         >
           {theme === 'light' ? (
-            <Moon className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+            <Moon className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
           ) : (
-            <Sun className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+            <Sun className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
           )}
-          {!collapsed && <span className="animate-fade-in">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
+          {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
         </Button>
 
         {/* User Profile */}
         <Button
           variant="ghost"
-          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
+          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
           onClick={() => setShowProfile(!showProfile)}
           title={collapsed ? "Profile" : undefined}
         >
-          <User className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-          {!collapsed && <span className="animate-fade-in">Profile</span>}
+          <User className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+          {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Profile</span>}
         </Button>
 
         {showProfile && !collapsed && (
-          <div className="ml-7 text-sm text-muted-foreground space-y-1 fade-in">
+          <div className="ml-7 text-sm text-muted-foreground space-y-1 animate-fade-in transition-all duration-300 ease-in-out">
             <p>John Doe</p>
             <p>john@example.com</p>
             <p className="text-xs">Professional Plan</p>
@@ -178,12 +178,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Logout */}
         <Button
           variant="ghost"
-          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} text-destructive hover:text-destructive`}
+          className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} text-destructive hover:text-destructive transition-all duration-300 ease-in-out`}
           onClick={onLogout}
           title={collapsed ? "Logout" : undefined}
         >
-          <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
-          {!collapsed && <span className="animate-fade-in">Logout</span>}
+          <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+          {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Logout</span>}
         </Button>
       </div>
 
