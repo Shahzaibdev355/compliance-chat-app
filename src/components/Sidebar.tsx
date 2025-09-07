@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
+import SearchChatDialog from './SearchChatDialog';
 import {
   MessageSquare,
   Search,
@@ -19,6 +20,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onAccessGPT: () => void;
   onAccessAgent: () => void;
+  onAccessLibrary: () => void;
   onLogout: () => void;
   currentMode: 'gpt' | 'agent' | 'chat';
   collapsed?: boolean;
@@ -29,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onNewChat,
   onAccessGPT,
   onAccessAgent,
+  onAccessLibrary,
   onLogout,
   currentMode,
   collapsed = false,
@@ -36,15 +39,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [showProfile, setShowProfile] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
 
   const handleSearchChat = () => {
-    console.log('Search chat clicked');
-    // TODO: Open search modal
-  };
-
-  const handleLibrary = () => {
-    console.log('Library clicked');
-    // TODO: Open library modal
+    setShowSearchDialog(true);
   };
 
   return (
@@ -132,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Button
             variant="ghost"
             className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'}`}
-            onClick={handleLibrary}
+            onClick={onAccessLibrary}
             title={collapsed ? "Library" : undefined}
           >
             <FileText className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
@@ -188,6 +186,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!collapsed && <span className="animate-fade-in">Logout</span>}
         </Button>
       </div>
+
+      {/* Search Chat Dialog */}
+      <SearchChatDialog 
+        open={showSearchDialog} 
+        onOpenChange={setShowSearchDialog} 
+      />
     </div>
   );
 };

@@ -8,12 +8,13 @@ import { useState, useEffect } from "react";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import AgentAndrewPage from "./pages/AgentAndrewPage";
+import LibraryPage from "./pages/LibraryPage";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'home' | 'agent'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'agent' | 'library'>('home');
 
   useEffect(() => {
     // Check for existing auth token
@@ -42,6 +43,10 @@ const App = () => {
     setCurrentPage('home');
   };
 
+  const handleAccessLibrary = () => {
+    setCurrentPage('library');
+  };
+
   if (!isAuthenticated) {
     return (
       <QueryClientProvider client={queryClient}>
@@ -66,10 +71,13 @@ const App = () => {
             {currentPage === 'home' ? (
               <HomePage 
                 onAccessAgent={handleAccessAgent}
+                onAccessLibrary={handleAccessLibrary}
                 onLogout={handleLogout}
               />
-            ) : (
+            ) : currentPage === 'agent' ? (
               <AgentAndrewPage onBack={handleBackToHome} />
+            ) : (
+              <LibraryPage onBack={handleBackToHome} />
             )}
           </div>
         </TooltipProvider>
