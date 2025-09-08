@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useChatHistory } from '@/contexts/ChatHistoryContext';
 import SearchChatDialog from './SearchChatDialog';
+import ChatEntryPopup from './ChatEntryPopup';
+import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare,
   Search,
   FileText,
   User,
   LogOut,
-  Sun,
-  Moon,
+  Palette,
   Bot,
   FileCheck,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit3,
+  History
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -37,7 +41,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   collapsed = false,
   onToggleCollapse
 }) => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
+  const { chatHistory } = useChatHistory();
+  const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
 
@@ -137,23 +143,54 @@ const Sidebar: React.FC<SidebarProps> = ({
             {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Library</span>}
           </Button>
         </div>
+
+        {/* Chat History */}
+        {!collapsed && chatHistory.length > 0 && (
+          <div className="space-y-2 mb-6">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide animate-fade-in transition-opacity duration-300 ease-in-out delay-75">
+              Chat History
+            </h3>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {chatHistory.slice(0, 5).map((entry, index) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-hover transition-all duration-200 animate-slide-in group"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <History className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs text-foreground truncate flex-1">
+                    {entry.title}
+                  </span>
+                  <ChatEntryPopup
+                    chatId={entry.id}
+                    currentTitle={entry.title}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                    </Button>
+                  </ChatEntryPopup>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom Section */}
       <div className="p-4 border-t border-border space-y-2">
-        {/* Theme Switcher */}
+        {/* Theme Settings */}
         <Button
           variant="ghost"
           className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
-          onClick={toggleTheme}
-          title={collapsed ? (theme === 'light' ? 'Dark Mode' : 'Light Mode') : undefined}
+          onClick={() => navigate('/theme-settings')}
+          title={collapsed ? "Theme Settings" : undefined}
         >
-          {theme === 'light' ? (
-            <Moon className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
-          ) : (
-            <Sun className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
-          )}
-          {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
+          <Palette className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
+          {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Theme Settings</span>}
         </Button>
 
         {/* User Profile */}
@@ -168,7 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Button>
 
         {showProfile && !collapsed && (
-          <div className="ml-7 text-sm text-muted-foreground space-y-1 animate-fade-in transition-all duration-300 ease-in-out">
+          <div className="ml-7 text-sm text-muted-foreground space-y-1 animate-fade-in transition-all duration-300 ease-in-out group">
             <p>John Doe</p>
             <p>john@example.com</p>
             <p className="text-xs">Professional Plan</p>

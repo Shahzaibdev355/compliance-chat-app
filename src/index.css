@@ -69,6 +69,44 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  .pink {
+    /* Pink Theme - Modern Gen-Z Professional */
+    --background: 0 0% 100%;            /* White background */
+    --foreground: 0 0% 7%;
+    
+    --card: 350 100% 92%;               /* #F5CFD0 - Secondary Pink */
+    --card-foreground: 0 0% 7%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    
+    --primary: 338 68% 70%;             /* #E781A5 - Primary Pink */
+    --primary-foreground: 0 0% 98%;
+    
+    --secondary: 350 100% 92%;          /* #F5CFD0 - Secondary Pink */
+    --secondary-foreground: 0 0% 7%;
+    
+    --muted: 350 50% 95%;
+    --muted-foreground: 0 0% 45%;
+    
+    --accent: 338 68% 70%;              /* #E781A5 - Accent Pink */
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 350 30% 85%;
+    --input: 350 30% 92%;
+    --ring: 338 68% 70%;
+    
+    /* Pink Chat Interface */
+    --chat-background: 0 0% 100%;
+    --chat-user-message: 338 68% 70%;   /* Primary Pink */
+    --chat-ai-message: 350 100% 92%;    /* Secondary Pink */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-hover: 350 50% 95%;
+  }
+
   .dark {
     /* Dark Theme - Professional Dark Mode */
     --background: 0 0% 5%;              /* #0D0D0D - Primary Dark */
@@ -158,6 +196,15 @@
     border-right: 2px solid;
     animation: typewriter 2s steps(40) 1s forwards, blink 1s infinite;
   }
+
+  /* Chat History Animations */
+  .animate-slide-in {
+    animation: slideInFromLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
 }
 
 @keyframes slideIn {
@@ -213,5 +260,27 @@
 @keyframes blink {
   50% {
     border-color: transparent;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

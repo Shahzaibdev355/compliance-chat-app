@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'dark' | 'light' | 'pink';
 
 interface ThemeContextType {
   theme: Theme;
@@ -35,7 +35,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('taxtro-theme', theme);
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove('light', 'dark', 'pink');
     root.classList.add(theme);
   }, [theme]);
 

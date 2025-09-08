@@ -5,6 +5,7 @@ import PlusButton from '@/components/PlusButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useChatHistory } from '@/contexts/ChatHistoryContext';
 import { ArrowLeft, Crown, Send, Mic, Plus, FileText, Search } from 'lucide-react';
 
 interface Message {
@@ -26,6 +27,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [centeredInput, setCenteredInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('gpt-4');
+  const { addChatEntry } = useChatHistory();
 
   const handleNewChat = () => {
     setMessages([]);
@@ -52,6 +54,9 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
   };
 
   const handleSendMessage = (content: string) => {
+    // Add to chat history
+    addChatEntry(content);
+    
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',

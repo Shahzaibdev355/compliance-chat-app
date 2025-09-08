@@ -4,11 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import AgentAndrewPage from "./pages/AgentAndrewPage";
 import LibraryPage from "./pages/LibraryPage";
+import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -64,23 +66,32 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <div className="min-h-screen bg-background">
-            {currentPage === 'home' ? (
-              <HomePage 
-                onAccessAgent={handleAccessAgent}
-                onAccessLibrary={handleAccessLibrary}
-                onLogout={handleLogout}
-              />
-            ) : currentPage === 'agent' ? (
-              <AgentAndrewPage onBack={handleBackToHome} />
-            ) : (
-              <LibraryPage onBack={handleBackToHome} />
-            )}
-          </div>
-        </TooltipProvider>
+        <ChatHistoryProvider>
+          <BrowserRouter>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/theme-settings" element={<ThemeSettingsPage />} />
+                <Route path="*" element={
+                  <div className="min-h-screen bg-background">
+                    {currentPage === 'home' ? (
+                      <HomePage 
+                        onAccessAgent={handleAccessAgent}
+                        onAccessLibrary={handleAccessLibrary}
+                        onLogout={handleLogout}
+                      />
+                    ) : currentPage === 'agent' ? (
+                      <AgentAndrewPage onBack={handleBackToHome} />
+                    ) : (
+                      <LibraryPage onBack={handleBackToHome} />
+                    )}
+                  </div>
+                } />
+              </Routes>
+            </TooltipProvider>
+          </BrowserRouter>
+        </ChatHistoryProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
