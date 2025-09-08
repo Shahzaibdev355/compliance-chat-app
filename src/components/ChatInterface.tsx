@@ -12,6 +12,7 @@ import {
   FileText,
   Search as SearchIcon
 } from 'lucide-react';
+import { ReferenceButtons } from './ReferenceButtons';
 
 interface Message {
   id: string;
@@ -82,6 +83,37 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }
     // TODO: Implement translation popup
   };
 
+  // Mock data for references - in real app, this would come from the AI response
+  const getMockReferences = () => [
+    {
+      id: '1',
+      title: 'SRO 123/2023',
+      content: 'This is the detailed content of SRO 123/2023 regarding tax compliance and regulatory requirements. It outlines the specific procedures and guidelines that must be followed by taxpayers and tax practitioners.\n\nSection 1: General Provisions\nThis section establishes the fundamental requirements...\n\nSection 2: Compliance Requirements\nTaxpayers must ensure that all documentation is properly maintained...',
+      type: 'SRO' as const
+    },
+    {
+      id: '2',
+      title: 'Rule 45A',
+      content: 'Rule 45A provides comprehensive guidance on the application of tax deductions and the proper documentation required for claiming such deductions.\n\nApplication Process:\n1. Submit Form XYZ within 30 days\n2. Provide supporting documentation\n3. Await approval from the tax authority',
+      type: 'Rule' as const
+    },
+    {
+      id: '3',
+      title: 'Section 80C',
+      content: 'Section 80C of the Income Tax Act deals with deductions available to individual taxpayers for investments in specified financial instruments and expenses.\n\nEligible Investments:\n- Public Provident Fund (PPF)\n- Employee Provident Fund (EPF)\n- Life Insurance Premiums\n- ELSS Mutual Funds\n\nMaximum Deduction: Rs. 1,50,000 per financial year',
+      type: 'Section' as const
+    }
+  ];
+
+  const getMockSummary = () => 
+    'Key takeaways from the tax advisory response:\n\n• Ensure compliance with SRO 123/2023 for proper documentation\n• Rule 45A allows deductions with proper form submission\n• Section 80C provides up to Rs. 1,50,000 deduction for eligible investments\n• Submit all required forms within specified deadlines\n• Maintain proper records for audit purposes';
+
+  const getMockPDFs = () => [
+    { id: '1', name: 'Tax Compliance Guide 2024.pdf', url: '/pdfs/tax-guide-2024.pdf' },
+    { id: '2', name: 'SRO Reference Manual.pdf', url: '/pdfs/sro-manual.pdf' },
+    { id: '3', name: 'Deduction Forms Package.pdf', url: '/pdfs/deduction-forms.pdf' }
+  ];
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Messages */}
@@ -110,29 +142,37 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }
               >
                 <p className="whitespace-pre-wrap">{message.content}</p>
                 {message.type === 'ai' && (
-                  <div className="flex gap-2 mt-3 pt-2 border-t border-border/20">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleSpeak(message.content)}
-                    >
-                      <Volume2 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCopy(message.content)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleTranslate(message.content)}
-                    >
-                      <Languages className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <>
+                    <div className="flex gap-2 mt-3 pt-2 border-t border-border/20">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleSpeak(message.content)}
+                      >
+                        <Volume2 className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCopy(message.content)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleTranslate(message.content)}
+                      >
+                        <Languages className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    {/* Reference Buttons */}
+                    <ReferenceButtons
+                      references={getMockReferences()}
+                      summary={getMockSummary()}
+                      availablePDFs={getMockPDFs()}
+                    />
+                  </>
                 )}
               </div>
             </div>
