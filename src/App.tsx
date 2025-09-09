@@ -2,13 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import AgentAndrewPage from "./pages/AgentAndrewPage";
+import AnalysisResultPage from "./pages/AnalysisResultPage";
 import LibraryPage from "./pages/LibraryPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 
@@ -16,7 +17,6 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'home' | 'agent' | 'library'>('home');
 
   useEffect(() => {
     // Check for existing auth token
@@ -34,19 +34,6 @@ const App = () => {
   const handleLogout = () => {
     localStorage.removeItem('taxtro-auth-token');
     setIsAuthenticated(false);
-    setCurrentPage('home');
-  };
-
-  const handleAccessAgent = () => {
-    setCurrentPage('agent');
-  };
-
-  const handleBackToHome = () => {
-    setCurrentPage('home');
-  };
-
-  const handleAccessLibrary = () => {
-    setCurrentPage('library');
   };
 
   if (!isAuthenticated) {
@@ -72,22 +59,17 @@ const App = () => {
               <Toaster />
               <Sonner />
               <Routes>
-                <Route path="/theme-settings" element={<ThemeSettingsPage />} />
-                <Route path="*" element={
-                  <div className="min-h-screen bg-background">
-                    {currentPage === 'home' ? (
-                      <HomePage 
-                        onAccessAgent={handleAccessAgent}
-                        onAccessLibrary={handleAccessLibrary}
-                        onLogout={handleLogout}
-                      />
-                    ) : currentPage === 'agent' ? (
-                      <AgentAndrewPage onBack={handleBackToHome} />
-                    ) : (
-                      <LibraryPage onBack={handleBackToHome} />
-                    )}
-                  </div>
+                <Route path="/" element={
+                  <HomePage 
+                    onAccessAgent={() => window.location.href = '/agent'} 
+                    onAccessLibrary={() => window.location.href = '/library'}
+                    onLogout={handleLogout} 
+                  />
                 } />
+                <Route path="/agent" element={<AgentAndrewPage onBack={() => window.history.back()} />} />
+                <Route path="/analysis-result" element={<AnalysisResultPage onBack={() => window.history.back()} />} />
+                <Route path="/library" element={<LibraryPage onBack={() => window.history.back()} />} />
+                <Route path="/theme-settings" element={<ThemeSettingsPage />} />
               </Routes>
             </TooltipProvider>
           </BrowserRouter>
