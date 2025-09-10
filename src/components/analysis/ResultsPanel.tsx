@@ -28,6 +28,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
   const [activeTab, setActiveTab] = useState('flags');
   const [additionalQuery, setAdditionalQuery] = useState('');
   const [queryResponse] = useState('Based on the analysis, I found several GST compliance issues that need immediate attention. The missing registration certificate and incomplete documentation could lead to penalties.');
+  const [chatMessages, setChatMessages] = useState<Array<{id: string, type: 'user' | 'assistant', content: string}>>([]);
   const { toast } = useToast();
 
   // Calculate counts for pie chart
@@ -90,14 +91,43 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
   const handleSendQuery = () => {
     if (additionalQuery.trim()) {
+      const userMessage = {
+        id: Date.now().toString(),
+        type: 'user' as const,
+        content: additionalQuery
+      };
+      
+      // Add user message
+      setChatMessages(prev => [...prev, userMessage]);
+      
+      // Simulate AI response
+      setTimeout(() => {
+        const aiResponse = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant' as const,
+          content: getDummyResponse(additionalQuery)
+        };
+        setChatMessages(prev => [...prev, aiResponse]);
+      }, 1000);
+      
+      setAdditionalQuery('');
       toast({
         title: "Query Sent",
-        description: "Your additional query has been processed",
+        description: "Processing your question...",
         duration: 2000,
       });
-      console.log('Additional query:', additionalQuery);
-      setAdditionalQuery('');
     }
+  };
+
+  const getDummyResponse = (query: string): string => {
+    const responses = [
+      "Based on the document analysis, I found that this relates to compliance requirements. The relevant section shows that proper documentation is required for this matter.",
+      "According to the tax regulations, this issue requires immediate attention. I recommend reviewing the specific clauses mentioned in pages 3-5 of your document.",
+      "The analysis indicates that this falls under the yellow flag category. You should consult with a tax professional to ensure full compliance.",
+      "This query relates to the compliance findings in your document. The relevant provisions suggest that corrective action may be needed within 30 days.",
+      "Based on the uploaded document, this issue appears in multiple sections. I recommend prioritizing the red-flagged items first before addressing this concern."
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const handleSpeakText = (text: string) => {
@@ -245,6 +275,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             {data.additionalQuery && (
               <TabsContent value="additional-query" className="h-full m-0">
                 <div className="p-4 space-y-4 h-full flex flex-col">
+                  {/* Initial Query and Response */}
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-sm font-medium text-foreground mb-2">Your Question:</h4>
@@ -282,8 +313,46 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       </p>
                     </div>
                   </div>
+
+                  {/* Chat Messages */}
+                  <div className="flex-1 overflow-y-auto space-y-3">
+                    {chatMessages.map((message) => (
+                      <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                          message.type === 'user' 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'bg-muted text-foreground'
+                        }`}>
+                          <p>{message.content}</p>
+                          {message.type === 'assistant' && (
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSpeakText(message.content)}
+                                className="h-6 px-2 text-xs"
+                                title="Play Audio"
+                              >
+                                🔊
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopyText(message.content)}
+                                className="h-6 px-2 text-xs"
+                                title="Copy Text"
+                              >
+                                📋
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   
-                  <div className="mt-auto">
+                  {/* Input Area */}
+                  <div className="border-t pt-3">
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -297,6 +366,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         size="sm"
                         onClick={handleSendQuery}
                         className="px-3"
+                        disabled={!additionalQuery.trim()}
                       >
                         <Send className="h-4 w-4" />
                       </Button>
@@ -317,56 +387,58 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
         </Tabs>
       </div>
 
-      {/* Bottom Action Bar */}
-      <div className="border-t border-border/20 p-4 bg-background/50 backdrop-blur-sm">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadAnnotated}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download PDF
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExportReport('pdf')}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Export PDF
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExportReport('csv')}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Export CSV
-          </Button>
-          <div className="flex-1" />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleShare}
-            className="flex items-center gap-2"
-          >
-            <Share className="h-4 w-4" />
-            Share
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleStartNewAnalysis}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            New Analysis
-          </Button>
+      {/* Bottom Action Bar - Only show for Flags tab */}
+      {activeTab === 'flags' && (
+        <div className="border-t border-border/20 p-4 bg-background/50 backdrop-blur-sm">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadAnnotated}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExportReport('pdf')}
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Export PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExportReport('csv')}
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <div className="flex-1" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="flex items-center gap-2"
+            >
+              <Share className="h-4 w-4" />
+              Share
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleStartNewAnalysis}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              New Analysis
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

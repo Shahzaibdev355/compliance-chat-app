@@ -17,7 +17,7 @@ export interface Flag {
 export interface AnalysisData {
   documentTitle: string;
   timestamp: string;
-  additionalQuery: string;
+  additionalQuery?: string;
   annotatedPdfUrl: string;
   originalPdfUrl: string;
   flags: Flag[];
@@ -33,7 +33,7 @@ export interface AnalysisData {
 export const mockAnalysisData: AnalysisData = {
   documentTitle: 'Tax_Compliance_Report_2024.pdf',
   timestamp: 'Jan 15, 2025 at 2:45 PM',
-  additionalQuery: 'Focus on GST compliance and deduction claims',
+  additionalQuery: localStorage.getItem('additionalQuery') || undefined,
   annotatedPdfUrl: '/sample.pdf',
   originalPdfUrl: '/sample.pdf',
   flags: [

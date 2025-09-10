@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +20,7 @@ interface AgentAndrewPageProps {
 }
 
 const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
+  const navigate = useNavigate();
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [query, setQuery] = useState('');
@@ -64,21 +66,11 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsProcessing(false);
-          setResults({
-            redFlags: [
-              'Missing Form 1120 Schedule M-1 reconciliation',
-              'Depreciation method inconsistency in Section 179'
-            ],
-            yellowFlags: [
-              'Unusual business expense ratios compared to industry standards',
-              'Missing documentation for meals & entertainment deductions'
-            ],
-            greenFlags: [
-              'Proper quarterly tax payment calculations',
-              'Compliant employee benefit deductions',
-              'Accurate inventory valuation methods'
-            ]
-          });
+          // Store uploaded file data for analysis result page
+          localStorage.setItem('uploadedPdf', uploadedFile.name);
+          localStorage.setItem('additionalQuery', query);
+          // Navigate to analysis result page
+          navigate('/analysis-result');
           return 100;
         }
         return prev + 10;
