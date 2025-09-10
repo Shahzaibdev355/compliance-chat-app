@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { ZoomIn, ZoomOut, Maximize, Minimize, RotateCcw, Search } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Minimize, RotateCcw, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,12 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   const [scale, setScale] = useState(1.0);
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [magnifierHeight, setMagnifierHeight] = useState(400);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [sentenceHighlights] = useState([
+    { id: 'h1', x: 50, y: 120, width: 300, height: 20, color: 'red', page: 1 },
+    { id: 'h2', x: 100, y: 180, width: 250, height: 20, color: 'yellow', page: 1 },
+    { id: 'h3', x: 80, y: 240, width: 280, height: 20, color: 'green', page: 1 },
+  ]);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -122,6 +128,15 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
         >
           <Search className="h-4 w-4" />
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsFullscreen(true)}
+          className="h-8 w-8 p-0"
+          title="Fullscreen View"
+        >
+          <Maximize className="h-4 w-4" />
+        </Button>
         <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
           <span>Scale: {Math.round(scale * 100)}%</span>
           {numPages && (
@@ -155,6 +170,24 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                   className="shadow-lg border border-border/20"
                 />
               </Document>
+              
+              {/* Sentence Highlights */}
+              {sentenceHighlights.filter(h => h.page === pageNumber).map((highlight) => (
+                <div
+                  key={highlight.id}
+                  className={`absolute border-2 opacity-60 z-5 ${
+                    highlight.color === 'red' ? 'border-red-500' :
+                    highlight.color === 'yellow' ? 'border-yellow-500' :
+                    'border-green-500'
+                  }`}
+                  style={{
+                    left: highlight.x * scale,
+                    top: highlight.y * scale,
+                    width: highlight.width * scale,
+                    height: highlight.height * scale,
+                  }}
+                />
+              ))}
               
               {/* Annotation Markers */}
               {currentPageFlags.map((flag) => (
@@ -263,6 +296,70 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                 </div>
               </div>
             </ScrollArea>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Overlay */}
+      {isFullscreen && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col">
+          <div className="flex justify-end p-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFullscreen(false)}
+              className="text-white hover:bg-white/10"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            <div className="flex justify-center">
+              <div className="relative inline-block">
+                <Document file={data.annotatedPdfUrl}>
+                  <Page
+                    pageNumber={pageNumber}
+                    scale={2.0}
+                    className="shadow-lg"
+                  />
+                </Document>
+                
+                {/* Fullscreen Sentence Highlights */}
+                {sentenceHighlights.filter(h => h.page === pageNumber).map((highlight) => (
+                  <div
+                    key={`fs-${highlight.id}`}
+                    className={`absolute border-2 opacity-60 z-5 ${
+                      highlight.color === 'red' ? 'border-red-500' :
+                      highlight.color === 'yellow' ? 'border-yellow-500' :
+                      'border-green-500'
+                    }`}
+                    style={{
+                      left: highlight.x * 2.0,
+                      top: highlight.y * 2.0,
+                      width: highlight.width * 2.0,
+                      height: highlight.height * 2.0,
+                    }}
+                  />
+                ))}
+                
+                {/* Fullscreen Markers */}
+                {currentPageFlags.map((flag) => (
+                  <button
+                    key={`fs-${flag.id}`}
+                    onClick={() => handleMarkerClick(flag)}
+                    className={`absolute w-8 h-8 rounded-full border-2 cursor-pointer z-10
+                      ${getMarkerColor(flag.color)}
+                      ${selectedFlagId === flag.id ? 'ring-2 ring-primary ring-offset-2' : ''}
+                      hover:scale-110 transition-transform duration-200`}
+                    style={{
+                      left: flag.x * 2.0,
+                      top: flag.y * 2.0,
+                    }}
+                    title={flag.title}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
