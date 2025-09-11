@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Edit, Download, FileText, Share, Plus, Flag, BarChart3, MessageSquare, Mic, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import FlagsList from './FlagsList';
@@ -26,8 +27,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
   onPieSegmentClick,
 }) => {
   const [activeTab, setActiveTab] = useState('flags');
-  const [additionalQuery, setAdditionalQuery] = useState('');
-  const [queryResponse] = useState('Based on the analysis, I found several GST compliance issues that need immediate attention. The missing registration certificate and incomplete documentation could lead to penalties.');
+  const [newMessage, setNewMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{id: string, type: 'user' | 'assistant', content: string}>>([]);
   const { toast } = useToast();
 
@@ -57,7 +57,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       description: "Annotated PDF download initiated",
       duration: 2000,
     });
-    // Mock download
     console.log('Downloading annotated PDF:', data.annotatedPdfUrl);
   };
 
@@ -67,7 +66,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       description: `Report export (${format.toUpperCase()}) initiated`,
       duration: 2000,
     });
-    // Mock export
     console.log('Exporting report as:', format);
   };
 
@@ -89,28 +87,26 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     console.log('Sharing analysis');
   };
 
-  const handleSendQuery = () => {
-    if (additionalQuery.trim()) {
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
       const userMessage = {
         id: Date.now().toString(),
         type: 'user' as const,
-        content: additionalQuery
+        content: newMessage
       };
       
-      // Add user message
       setChatMessages(prev => [...prev, userMessage]);
       
-      // Simulate AI response
       setTimeout(() => {
         const aiResponse = {
           id: (Date.now() + 1).toString(),
           type: 'assistant' as const,
-          content: getDummyResponse(additionalQuery)
+          content: getDummyResponse(newMessage)
         };
         setChatMessages(prev => [...prev, aiResponse]);
       }, 1000);
       
-      setAdditionalQuery('');
+      setNewMessage('');
       toast({
         title: "Query Sent",
         description: "Processing your question...",
@@ -175,7 +171,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </div>
         )}
       </div>
-
 
       {/* Tabs */}
       <div className="flex-1 overflow-hidden">
@@ -272,9 +267,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
             <TabsContent value="additional-query" className="h-full m-0">
               <div className="p-4 space-y-4 h-full flex flex-col">
-                {/* Initial Query and Response - Only show if there's an initial query */}
+                {/* Initial Query and Response - Show if there's an initial query */}
                 {data.additionalQuery && (
-                  <div className="space-y-3">
+                  <div className="space-y-4 pb-4 border-b border-border/20">
                     <div>
                       <h4 className="text-sm font-medium text-foreground mb-2">Your Question:</h4>
                       <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
@@ -289,7 +284,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleSpeakText(queryResponse)}
+                            onClick={() => handleSpeakText("Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance.")}
                             className="h-7 px-2"
                             title="Play Audio"
                           >
@@ -298,21 +293,21 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleCopyText(queryResponse)}
+                            onClick={() => handleCopyText("Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance.")}
                             className="h-7 px-2"
-                            title="Copy Text"
+                            title="Copy"
                           >
                             📋
                           </Button>
                         </div>
                       </div>
-                      <p className="text-sm text-foreground bg-background border rounded-lg p-3">
-                        {queryResponse}
+                      <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                        Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance.
                       </p>
                     </div>
                   </div>
                 )}
-
+                
                 {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto space-y-3">
                   {!data.additionalQuery && chatMessages.length === 0 && (
@@ -345,7 +340,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                               size="sm"
                               onClick={() => handleCopyText(message.content)}
                               className="h-6 px-2 text-xs"
-                              title="Copy Text"
+                              title="Copy"
                             >
                               📋
                             </Button>
@@ -356,34 +351,25 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                   ))}
                 </div>
                 
-                {/* Input Area */}
-                <div className="border-t pt-3">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={additionalQuery}
-                      onChange={(e) => setAdditionalQuery(e.target.value)}
-                      placeholder="Ask additional questions..."
-                      className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendQuery()}
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleSendQuery}
-                      className="px-3"
-                      disabled={!additionalQuery.trim()}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="px-3"
-                      title="Voice Input"
-                    >
-                      <Mic className="h-4 w-4" />
-                    </Button>
-                  </div>
+                {/* Chat Input */}
+                <div className="flex gap-2 pt-3 border-t border-border/20">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Ask a follow-up question..."
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                    size="sm"
+                  >
+                    Send
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    🎤
+                  </Button>
                 </div>
               </div>
             </TabsContent>
