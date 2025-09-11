@@ -197,12 +197,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
               <BarChart3 className="h-3 w-3" />
               Graph
             </TabsTrigger>
-            {data.additionalQuery && (
-              <TabsTrigger value="additional-query" className="flex items-center gap-2">
-                <MessageSquare className="h-3 w-3" />
-                Additional Query
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="additional-query" className="flex items-center gap-2">
+              <MessageSquare className="h-3 w-3" />
+              Additional Query
+            </TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-hidden">
@@ -272,10 +270,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
               </div>
             </TabsContent>
 
-            {data.additionalQuery && (
-              <TabsContent value="additional-query" className="h-full m-0">
-                <div className="p-4 space-y-4 h-full flex flex-col">
-                  {/* Initial Query and Response */}
+            <TabsContent value="additional-query" className="h-full m-0">
+              <div className="p-4 space-y-4 h-full flex flex-col">
+                {/* Initial Query and Response - Only show if there's an initial query */}
+                {data.additionalQuery && (
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-sm font-medium text-foreground mb-2">Your Question:</h4>
@@ -313,76 +311,82 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       </p>
                     </div>
                   </div>
+                )}
 
-                  {/* Chat Messages */}
-                  <div className="flex-1 overflow-y-auto space-y-3">
-                    {chatMessages.map((message) => (
-                      <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] p-3 rounded-lg text-sm ${
-                          message.type === 'user' 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted text-foreground'
-                        }`}>
-                          <p>{message.content}</p>
-                          {message.type === 'assistant' && (
-                            <div className="flex gap-2 mt-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleSpeakText(message.content)}
-                                className="h-6 px-2 text-xs"
-                                title="Play Audio"
-                              >
-                                🔊
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleCopyText(message.content)}
-                                className="h-6 px-2 text-xs"
-                                title="Copy Text"
-                              >
-                                📋
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Input Area */}
-                  <div className="border-t pt-3">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={additionalQuery}
-                        onChange={(e) => setAdditionalQuery(e.target.value)}
-                        placeholder="Ask additional questions..."
-                        className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendQuery()}
-                      />
-                      <Button
-                        size="sm"
-                        onClick={handleSendQuery}
-                        className="px-3"
-                        disabled={!additionalQuery.trim()}
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="px-3"
-                        title="Voice Input"
-                      >
-                        <Mic className="h-4 w-4" />
-                      </Button>
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-y-auto space-y-3">
+                  {!data.additionalQuery && chatMessages.length === 0 && (
+                    <div className="text-center text-muted-foreground py-8">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>Start a conversation about your analysis</p>
                     </div>
+                  )}
+                  {chatMessages.map((message) => (
+                    <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                        message.type === 'user' 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted text-foreground'
+                      }`}>
+                        <p>{message.content}</p>
+                        {message.type === 'assistant' && (
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleSpeakText(message.content)}
+                              className="h-6 px-2 text-xs"
+                              title="Play Audio"
+                            >
+                              🔊
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopyText(message.content)}
+                              className="h-6 px-2 text-xs"
+                              title="Copy Text"
+                            >
+                              📋
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Input Area */}
+                <div className="border-t pt-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={additionalQuery}
+                      onChange={(e) => setAdditionalQuery(e.target.value)}
+                      placeholder="Ask additional questions..."
+                      className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendQuery()}
+                    />
+                    <Button
+                      size="sm"
+                      onClick={handleSendQuery}
+                      className="px-3"
+                      disabled={!additionalQuery.trim()}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="px-3"
+                      title="Voice Input"
+                    >
+                      <Mic className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              </TabsContent>
-            )}
+              </div>
+            </TabsContent>
           </div>
         </Tabs>
       </div>
