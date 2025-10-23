@@ -157,16 +157,16 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="border-b border-border/20 p-4 space-y-3">
+      <div className="border-b border-border/20 p-3 md:p-4 space-y-2 md:space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">{data.documentTitle}</h2>
-            <p className="text-sm text-muted-foreground">Processed on {data.timestamp}</p>
+            <h2 className="text-base md:text-lg font-semibold text-foreground">{data.documentTitle}</h2>
+            <p className="text-xs md:text-sm text-muted-foreground">Processed on {data.timestamp}</p>
           </div>
         </div>
         
         {data.additionalQuery && (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs md:text-sm text-muted-foreground">
             Additional Query: {data.additionalQuery}
           </div>
         )}
@@ -175,26 +175,26 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       {/* Tabs */}
       <div className="flex-1 overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <TabsList className="m-4 mb-0">
-            <TabsTrigger value="flags" className="flex items-center gap-2">
+          <TabsList className="m-3 md:m-4 mb-0 overflow-x-auto flex-wrap h-auto">
+            <TabsTrigger value="flags" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
               <Flag className="h-3 w-3" />
-              Flags
+              <span className="hidden sm:inline">Flags</span>
             </TabsTrigger>
-            <TabsTrigger value="findings" className="flex items-center gap-2">
+            <TabsTrigger value="findings" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
               <FileText className="h-3 w-3" />
-              Text Findings
+              <span className="hidden sm:inline">Text Findings</span>
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2">
+            <TabsTrigger value="recommendations" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
               <Plus className="h-3 w-3" />
-              Recommendations
+              <span className="hidden sm:inline">Recommendations</span>
             </TabsTrigger>
-            <TabsTrigger value="graph" className="flex items-center gap-2">
+            <TabsTrigger value="graph" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
               <BarChart3 className="h-3 w-3" />
-              Graph
+              <span className="hidden sm:inline">Graph</span>
             </TabsTrigger>
-            <TabsTrigger value="additional-query" className="flex items-center gap-2">
+            <TabsTrigger value="additional-query" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
               <MessageSquare className="h-3 w-3" />
-              Additional Query
+              <span className="hidden sm:inline">Query</span>
             </TabsTrigger>
           </TabsList>
 
@@ -379,52 +379,56 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
       {/* Bottom Action Bar - Only show for Flags tab */}
       {activeTab === 'flags' && (
-        <div className="border-t border-border/20 p-4 bg-background/50 backdrop-blur-sm">
+        <div className="border-t border-border/20 p-3 md:p-4 bg-background/50 backdrop-blur-sm">
           <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
               onClick={handleDownloadAnnotated}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs"
             >
-              <Download className="h-4 w-4" />
-              Download PDF
+              <Download className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Download PDF</span>
+              <span className="sm:hidden">Download</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleExportReport('pdf')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs"
             >
-              <FileText className="h-4 w-4" />
-              Export PDF
+              <FileText className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleExportReport('csv')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs"
             >
-              <FileText className="h-4 w-4" />
-              Export CSV
+              <FileText className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">CSV</span>
             </Button>
             <div className="flex-1" />
             <Button
               variant="outline"
               size="sm"
               onClick={handleShare}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs"
             >
-              <Share className="h-4 w-4" />
-              Share
+              <Share className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Share</span>
             </Button>
             <Button
               size="sm"
               onClick={handleStartNewAnalysis}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs"
             >
-              <Plus className="h-4 w-4" />
-              New Analysis
+              <Plus className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">New Analysis</span>
+              <span className="sm:hidden">New</span>
             </Button>
           </div>
         </div>

@@ -17,8 +17,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Auth attempt:', { email, password, name });
-    onLogin(); // Dummy login
+    
+    // Validate credentials
+    const VALID_EMAIL = 'taxtro.ai@gmail.com';
+    const VALID_PASSWORD = 'taxtro-testing';
+    
+    if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+      onLogin();
+    } else {
+      alert('Invalid credentials. Please use:\nEmail: taxtro.ai@gmail.com\nPassword: taxtro-testing');
+    }
   };
 
   const handleGoogleSignIn = () => {

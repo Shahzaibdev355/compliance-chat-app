@@ -106,11 +106,11 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center space-y-8 max-w-2xl px-6">
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold">What are you working on today?</h1>
-                <p className="text-muted-foreground text-lg">
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center space-y-6 md:space-y-8 max-w-2xl w-full px-4 md:px-6">
+              <div className="space-y-3 md:space-y-4">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">What are you working on today?</h1>
+                <p className="text-muted-foreground text-base md:text-lg">
                   Choose how you'd like to interact with our AI system
                 </p>
               </div>
@@ -150,22 +150,22 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
               </form>
 
               {/* Mode Selection Cards */}
-              <div className="grid md:grid-cols-2 gap-4 mt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mt-6 md:mt-8">
                 <button
                   onClick={handleAccessGPT}
-                  className="p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
+                  className="p-4 md:p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
                 >
-                  <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Access Normal GPT</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold mb-1 md:mb-2 group-hover:text-primary transition-colors text-sm md:text-base">Access Normal GPT</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Standard chat Q&A mode for general tax questions and advice
                   </p>
                 </button>
                 <button
                   onClick={onAccessAgent}
-                  className="p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
+                  className="p-4 md:p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
                 >
-                  <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Access Agent Andrew</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold mb-1 md:mb-2 group-hover:text-primary transition-colors text-sm md:text-base">Access Agent Andrew</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Dedicated document compliance analysis with Income Tax law validation
                   </p>
                 </button>
@@ -204,20 +204,20 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
         </div>
 
         {/* Chat Header with Model Dropdown and Back Button */}
-        <div className="border-b border-border p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="border-b border-border p-3 md:p-4 flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2 md:gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleBackToWelcome}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 md:gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              <span className="hidden sm:inline">Back</span>
             </Button>
             
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-32 md:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

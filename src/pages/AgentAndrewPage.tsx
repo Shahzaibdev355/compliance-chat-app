@@ -92,31 +92,31 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="border-b border-border p-6">
-        <div className="flex items-center gap-4">
+      <div className="border-b border-border p-4 md:p-6">
+        <div className="flex items-center gap-3 md:gap-4">
           <Button variant="ghost" size="sm" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            <span className="hidden sm:inline">Back</span>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Agent Andrew</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl md:text-2xl font-bold">Agent Andrew</h1>
+            <p className="text-muted-foreground text-sm md:text-base">
               AI-powered document compliance analysis for Income Tax laws
             </p>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 md:p-6 overflow-y-auto">
         {!results ? (
           <div className="max-w-2xl mx-auto space-y-6">
             {/* File Upload Area */}
             <Card>
               <CardContent className="p-8">
                 <div
-                  className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+                  className={`border-2 border-dashed rounded-lg p-6 md:p-12 text-center transition-colors ${
                     dragActive 
                       ? 'border-primary bg-primary/5' 
                       : 'border-border hover:border-primary/50'
@@ -126,11 +126,11 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
                 >
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">
+                  <Upload className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-3 md:mb-4 text-muted-foreground" />
+                  <h3 className="text-base md:text-lg font-semibold mb-2">
                     Upload Documents for Analysis
                   </h3>
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-muted-foreground text-sm md:text-base mb-3 md:mb-4">
                     Drag & drop your PDF files or images here, or click to browse
                   </p>
                   <input
@@ -181,13 +181,14 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={handleCancel}>
+            <div className="flex flex-col sm:flex-row gap-2 md:gap-3 justify-end">
+              <Button variant="outline" onClick={handleCancel} className="w-full sm:w-auto">
                 Cancel
               </Button>
               <Button 
                 onClick={handleProceed}
                 disabled={!uploadedFile || isProcessing}
+                className="w-full sm:w-auto"
               >
                 {isProcessing ? 'Processing...' : 'Proceed with Analysis'}
               </Button>

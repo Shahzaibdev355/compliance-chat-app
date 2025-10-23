@@ -219,21 +219,21 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4">
               <Button variant="ghost" size="sm" onClick={onBack}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <span className="hidden sm:inline">Back</span>
               </Button>
               <div>
-                <h1 className="text-2xl font-semibold">Document Library</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-xl md:text-2xl font-semibold">Document Library</h1>
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Manage your uploaded files and documents
                 </p>
               </div>
             </div>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Upload className="h-4 w-4 mr-2" />
               Upload Files
             </Button>
@@ -242,23 +242,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
         {/* Search and View Controls */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="relative max-w-md flex-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4 md:mb-6">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search files..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 w-full"
             />
           </div>
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-2">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('grid')}
+              className="flex-1 sm:flex-none"
             >
               <Grid3X3 className="h-4 w-4" />
             </Button>
@@ -266,6 +267,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('list')}
+              className="flex-1 sm:flex-none"
             >
               <List className="h-4 w-4" />
             </Button>
