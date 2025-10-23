@@ -15,6 +15,26 @@ import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = ({ onLogout }: { onLogout: () => void }) => {
+  const navigate = useNavigate();
+
+  return (
+    <Routes>
+      <Route path="/" element={
+        <HomePage 
+          onAccessAgent={() => navigate('/agent')} 
+          onAccessLibrary={() => navigate('/library')}
+          onLogout={onLogout} 
+        />
+      } />
+      <Route path="/agent" element={<AgentAndrewPage onBack={() => navigate(-1)} />} />
+      <Route path="/analysis-result" element={<AnalysisResultPage onBack={() => navigate(-1)} />} />
+      <Route path="/library" element={<LibraryPage onBack={() => navigate(-1)} />} />
+      <Route path="/theme-settings" element={<ThemeSettingsPage />} />
+    </Routes>
+  );
+};
+
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -58,19 +78,7 @@ const App = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <Routes>
-                <Route path="/" element={
-                  <HomePage 
-                    onAccessAgent={() => window.location.href = '/agent'} 
-                    onAccessLibrary={() => window.location.href = '/library'}
-                    onLogout={handleLogout} 
-                  />
-                } />
-                <Route path="/agent" element={<AgentAndrewPage onBack={() => window.history.back()} />} />
-                <Route path="/analysis-result" element={<AnalysisResultPage onBack={() => window.history.back()} />} />
-                <Route path="/library" element={<LibraryPage onBack={() => window.history.back()} />} />
-                <Route path="/theme-settings" element={<ThemeSettingsPage />} />
-              </Routes>
+              <AppRoutes onLogout={handleLogout} />
             </TooltipProvider>
           </BrowserRouter>
         </ChatHistoryProvider>
