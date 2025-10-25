@@ -27,21 +27,25 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [centeredInput, setCenteredInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('gpt-4');
-  const { addChatEntry } = useChatHistory();
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const { addChatEntry, loadChat } = useChatHistory();
 
   const handleNewChat = () => {
     setMessages([]);
     setCurrentMode('chat');
+    setCurrentChatId(null);
   };
 
   const handleAccessGPT = () => {
     setCurrentMode('gpt');
     setMessages([]);
+    setCurrentChatId(null);
   };
 
   const handleBackToWelcome = () => {
     setCurrentMode('gpt');
     setMessages([]);
+    setCurrentChatId(null);
   };
 
   const handleCenteredSubmit = (e: React.FormEvent) => {
@@ -53,10 +57,16 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
     }
   };
 
+  const handleLoadChat = (chatId: string) => {
+    const chatMessages = loadChat(chatId);
+    if (chatMessages) {
+      setMessages(chatMessages);
+      setCurrentChatId(chatId);
+      setCurrentMode('chat');
+    }
+  };
+
   const handleSendMessage = (content: string) => {
-    // Add to chat history
-    addChatEntry(content);
-    
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -64,7 +74,8 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
 
     // Simulate AI response
     setTimeout(() => {
@@ -74,7 +85,14 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
         content: `Thank you for your question: "${content}". As your AI tax advisor, I'm here to help with compliance matters, tax planning, and regulatory questions. This is a demo response - in a real implementation, this would be connected to a sophisticated AI model trained on tax law and regulations.`,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, aiMessage]);
+      const finalMessages = [...updatedMessages, aiMessage];
+      setMessages(finalMessages);
+      
+      // Save to chat history only for new chats or first message
+      if (!currentChatId || messages.length === 0) {
+        addChatEntry(content, finalMessages);
+        setCurrentChatId(Date.now().toString());
+      }
     }, 1000);
   };
 
@@ -91,6 +109,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
           currentMode={currentMode}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onLoadChat={handleLoadChat}
         />
         <div className="flex-1 flex flex-col">
           {/* Upgrade Banner */}
@@ -189,6 +208,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
         currentMode={currentMode}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onLoadChat={handleLoadChat}
       />
       <div className="flex-1 flex flex-col">
         {/* Upgrade Banner */}

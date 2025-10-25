@@ -31,6 +31,7 @@ interface SidebarProps {
   currentMode: 'gpt' | 'agent' | 'chat';
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  onLoadChat?: (chatId: string) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -41,7 +42,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onLogout,
   currentMode,
   collapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  onLoadChat
 }) => {
   const { theme } = useTheme();
   const { chatHistory } = useChatHistory();
@@ -174,8 +176,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               {chatHistory.slice(0, 5).map((entry, index) => (
                 <div
                   key={entry.id}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-hover transition-all duration-200 animate-slide-in group"
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-hover transition-all duration-200 animate-slide-in group cursor-pointer"
                   style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => onLoadChat?.(entry.id)}
                 >
                   <History className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   <span className="text-xs text-foreground truncate flex-1">
@@ -189,6 +192,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <Edit3 className="h-3 w-3" />
                     </Button>
