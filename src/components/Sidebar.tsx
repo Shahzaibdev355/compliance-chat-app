@@ -5,6 +5,8 @@ import { useChatHistory } from '@/contexts/ChatHistoryContext';
 import SearchChatDialog from './SearchChatDialog';
 import ChatEntryPopup from './ChatEntryPopup';
 import { useNavigate } from 'react-router-dom';
+import taxtroLogo from '@/assets/taxtro-logo.png';
+import taxtroIcon from '@/assets/taxtro-icon.png';
 import {
   MessageSquare,
   Search,
@@ -52,18 +54,36 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out transform`}>
+    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out`}>
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && <h2 className="text-lg font-semibold animate-fade-in transition-opacity duration-300 ease-in-out delay-75">Taxtro AI</h2>}
+        <div className="flex items-center flex-1 overflow-hidden">
+          {collapsed ? (
+            <img 
+              src={taxtroIcon} 
+              alt="TaxTro" 
+              className="h-8 w-8 animate-fade-in transition-all duration-300 ease-in-out"
+            />
+          ) : (
+            <img 
+              src={taxtroLogo} 
+              alt="TaxTro AI" 
+              className="h-10 w-auto animate-fade-in transition-all duration-300 ease-in-out"
+            />
+          )}
+        </div>
         {onToggleCollapse && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onToggleCollapse}
-            className="ml-auto transition-all duration-300 ease-in-out"
+            className="ml-2 flex-shrink-0 transition-all duration-300 ease-in-out hover:bg-sidebar-hover"
           >
-            {collapsed ? <ChevronRight className="h-4 w-4 transition-transform duration-300 ease-in-out" /> : <ChevronLeft className="h-4 w-4 transition-transform duration-300 ease-in-out" />}
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4 transition-transform duration-300 ease-in-out" />
+            ) : (
+              <ChevronLeft className="h-4 w-4 transition-transform duration-300 ease-in-out" />
+            )}
           </Button>
         )}
       </div>

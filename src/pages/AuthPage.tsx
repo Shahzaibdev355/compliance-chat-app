@@ -4,42 +4,121 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff } from 'lucide-react';
+import { z } from 'zod';
+import { useToast } from '@/hooks/use-toast';
+import taxtroLogo from '@/assets/taxtro-logo.png';
+
+// Validation schemas
+const signInSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const signUpSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 interface AuthPageProps {
   onLogin: () => void;
 }
 
 const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    
+    // Validate form
+    const result = signInSchema.safeParse({ email, password });
+    
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0].toString()] = error.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
     
     // Validate credentials
     const VALID_EMAIL = 'taxtro.ai@gmail.com';
     const VALID_PASSWORD = 'taxtro-testing';
     
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
+      });
       onLogin();
     } else {
-      alert('Invalid credentials. Please use:\nEmail: taxtro.ai@gmail.com\nPassword: taxtro-testing');
+      setErrors({ 
+        email: 'Invalid credentials',
+        password: 'Please use: taxtro.ai@gmail.com / taxtro-testing'
+      });
     }
   };
 
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    
+    // Validate form
+    const result = signUpSchema.safeParse({ name, email, password, confirmPassword });
+    
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0].toString()] = error.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+    
+    toast({
+      title: "Account created!",
+      description: "Your account has been successfully created.",
+    });
+    onLogin();
+  };
+
   const handleGoogleSignIn = () => {
-    console.log('Google Sign-In clicked');
-    onLogin(); // Dummy login
+    toast({
+      title: "Google Sign-In",
+      description: "Google authentication will be available soon.",
+    });
+    onLogin();
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Taxtro AI</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4 pb-8">
+          <div className="flex justify-center mb-2">
+            <img 
+              src={taxtroLogo} 
+              alt="TaxTro AI" 
+              className="h-16 w-auto animate-fade-in"
+            />
+          </div>
+          <CardDescription className="text-base">
             Professional AI-powered tax compliance
           </CardDescription>
         </CardHeader>
@@ -51,31 +130,45 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Input
                     type="email"
                     placeholder="Email address"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setErrors(prev => ({ ...prev, email: '' }));
+                    }}
+                    className={errors.email ? 'border-destructive' : ''}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-destructive animate-fade-in">{errors.email}</p>
+                  )}
                 </div>
-                <div className="space-y-2 relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setErrors(prev => ({ ...prev, password: '' }));
+                      }}
+                      className={errors.password ? 'border-destructive' : ''}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-sm text-destructive animate-fade-in">{errors.password}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full">
                   Sign In
@@ -107,40 +200,84 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Input
                     type="text"
                     placeholder="Full name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      setErrors(prev => ({ ...prev, name: '' }));
+                    }}
+                    className={errors.name ? 'border-destructive' : ''}
                   />
+                  {errors.name && (
+                    <p className="text-sm text-destructive animate-fade-in">{errors.name}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Input
                     type="email"
                     placeholder="Email address"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setErrors(prev => ({ ...prev, email: '' }));
+                    }}
+                    className={errors.email ? 'border-destructive' : ''}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-destructive animate-fade-in">{errors.email}</p>
+                  )}
                 </div>
-                <div className="space-y-2 relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setErrors(prev => ({ ...prev, password: '' }));
+                      }}
+                      className={errors.password ? 'border-destructive' : ''}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-sm text-destructive animate-fade-in">{errors.password}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Confirm password"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setErrors(prev => ({ ...prev, confirmPassword: '' }));
+                      }}
+                      className={errors.confirmPassword ? 'border-destructive' : ''}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-destructive animate-fade-in">{errors.confirmPassword}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full">
                   Create Account
