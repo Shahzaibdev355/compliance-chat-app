@@ -68,8 +68,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       onLogin();
     } else {
       setErrors({ 
-        email: 'Invalid credentials',
-        password: 'Please use: taxtro.ai@gmail.com / taxtro-testing'
+        email: 'Invalid email or password',
+        password: 'Invalid email or password'
       });
     }
   };
