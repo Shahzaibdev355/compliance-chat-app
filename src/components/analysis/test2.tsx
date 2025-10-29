@@ -22,13 +22,9 @@ import {
   AreaHighlight,
 } from "react-pdf-highlighter";
 
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
-
 import AnnualReport from "../../assets/pdf/AnnualReport.pdf";
 
 import * as pdfjsLib from "pdfjs-dist";
-import test from "node:test";
 // import "pdfjs-dist/build/pdf.worker.entry";
 
 // Configure PDF.js worker
@@ -48,6 +44,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
+
 
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [magnifierHeight, setMagnifierHeight] = useState(400);
@@ -89,6 +86,9 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   // };
 
   // console.log(textItems);
+
+ 
+
 
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 3.0));
   const zoomOut = () => setScale((prev) => Math.max(prev - 0.2, 0.5));
@@ -136,112 +136,125 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
       text: "the requirements of Companies Act, 2017 (XIX of 2017)",
       color: "green",
     },
-    {
-      text: "misstatement, whether due to fraud or error, and to issue an auditors’ report that includes our opinion.",
-      color: "red",
-    },
-
-    {
-      text: "Conclude on the appropriateness of management’s use of the going concern basis of accounting",
-      color: "yellow",
-    },
-    {
-      text: "Evaluate the overall presentation, structure and content of the financial statements",
-      color: "green",
-    },
-    {
-      text: "no zakat deductible at source under the Zakat and Ushr Ordinance, 1980 (XVIII of 1980)",
-      color: "red",
-    },
   ];
 
-  function highlightText() {
-    const bgFor = (color: string) => {
-      switch (color) {
-        case "red":
-          return "hsl(0 84% 60% / 0.35)";
-        case "yellow":
-          return "rgb(234 179 8 / 0.35)";
-        case "green":
-          return "rgb(34 197 94 / 0.35)";
-        default:
-          return "rgba(255, 255, 0, 0.3)";
-      }
-    };
 
-    const textLayers = document.querySelectorAll(
-      ".react-pdf__Page__textContent"
-    );
-    if (!textLayers.length) return;
+
+
+//   useEffect(() => {
+//     // small helper to get CSS background for color keys
+//     const bgFor = (color: string) => {
+//       switch (color) {
+//         case "red":
+//           return "hsl(0 84% 60% / 0.35)"; // proper vivid red with transparency
+//         case "yellow":
+//           return "rgb(234 179 8 / 0.35)"; // proper amber-500 tone
+//         case "green":
+//           return "rgb(34 197 94 / 0.35)"; // proper green-500 tone
+//         default:
+//           return "rgba(255, 255, 0, 0.3)";
+//       }
+//     };
+
+//     // Wait for text layer to exist/render. You can increase timeout if needed.
+//     const timer = setTimeout(() => {
+//       const textLayers = document.querySelectorAll(
+//         ".react-pdf__Page__textContent"
+//       );
+
+//       if (!textLayers || textLayers.length === 0) {
+//         // no text layers yet — bail; next render (page change) will re-run effect
+//         return;
+//       }
+
+//       textLayers.forEach((layer) => {
+//         // iterate each span inside the text layer
+//         const spans = Array.from(layer.querySelectorAll("span"));
+
+//         spans.forEach((span) => {
+//           // skip if span is already highlighted (so we don't double wrap)
+//           if (!span.textContent) return;
+
+//           let spanText = span.textContent;
+
+//           // For each phrase, replace matches inside this span only
+//           dummyHighlights.forEach(({ text, color }) => {
+//             // Build a regex that escapes special chars in text
+//             const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+//             const regex = new RegExp(escaped, "gi");
+
+//             // If match exists in this span, replace it with a <mark> with inline bg
+//             if (regex.test(spanText)) {
+//               // Use replace with callback to preserve original case
+//               const replaced = spanText.replace(regex, (match) => {
+//                 const bg = bgFor(color);
+//                 // include data-color for debug/inspecting; pointerEvents none so text selection works
+//                 return `<mark data-hl-color="${color}" style="background:${bg}; color:inherit;  padding:0 2px; border-radius:2px; mix-blend-mode:multiply;
+//  pointer-events:none;">${match}</mark>`;
+//               });
+
+//               // replace span innerHTML safely (span has only text nodes by react-pdf)
+//               span.innerHTML = replaced;
+//               // update spanText so further phrases don't re-process already wrapped content
+//               spanText = span.textContent || "";
+//             }
+//           });
+//         });
+//       });
+//     }, 600); // 600ms usually safe; increase to 1000 if PDF is heavy
+
+//     return () => clearTimeout(timer);
+//   }, [pageNumber /*, optionally numPages or scale if you want re-run */]);
+
+
+
+  
+useEffect(() => {
+  const timer = setTimeout(() => {
+    const textLayers = document.querySelectorAll(".react-pdf__Page__textContent");
 
     textLayers.forEach((layer) => {
+      // Remove old highlights if any
+      layer.querySelectorAll("mark[data-hl-color]").forEach((mark) => mark.replaceWith(...mark.childNodes));
+
       const spans = Array.from(layer.querySelectorAll("span"));
       spans.forEach((span) => {
-        if (!span.textContent || span.dataset.hlProcessed === "true") return;
+        if (!span.textContent) return;
         let spanText = span.textContent;
-
         dummyHighlights.forEach(({ text, color }) => {
           const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           const regex = new RegExp(escaped, "gi");
           if (regex.test(spanText)) {
             const replaced = spanText.replace(regex, (match) => {
-              const bg = bgFor(color);
-              return `<mark style="background:${bg}; color:inherit; padding:0 2px; border-radius:2px; mix-blend-mode:multiply; pointer-events:none;">${match}</mark>`;
+              const bg = color === "red"
+                ? "rgba(255,0,0,0.35)"
+                : color === "yellow"
+                ? "rgba(255,255,0,0.35)"
+                : "rgba(0,255,0,0.35)";
+              return `<mark data-hl-color="${color}" style="background:${bg};border-radius:2px;">${match}</mark>`;
             });
             span.innerHTML = replaced;
-            span.dataset.hlProcessed = "true"; // prevent reapplying multiple times
             spanText = span.textContent || "";
           }
         });
       });
     });
-  }
+  }, 500);
 
-  // ✅ Reapply highlights after every PDF re-render (zoom, pan, resize)
-  // useEffect(() => {
-  //   const observer = new MutationObserver(() => {
-  //     // Whenever React-PDF re-renders the text layer, rerun highlight logic
-  //     highlightText();
-  //   });
+  return () => clearTimeout(timer);
+}, [pageNumber, scale]);
 
-  //   // Watch all text layers for mutation (React-PDF replaces them on zoom)
-  //   const container = document.querySelector(".react-pdf__Document");
-  //   if (container) {
-  //     observer.observe(container, {
-  //       childList: true,
-  //       subtree: true,
-  //     });
-  //   }
 
-  //   // Initial highlight on mount
-  //   highlightText();
 
-  //   return () => observer.disconnect();
-  // }, [pageNumber, scale]);
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      highlightText();
-    });
 
-    // Watch *all* PDF documents (normal + fullscreen)
-    const containers = document.querySelectorAll(".react-pdf__Document");
-    containers.forEach((container) => {
-      observer.observe(container, { childList: true, subtree: true });
-    });
-
-    // Initial highlight on mount
-    highlightText();
-
-    return () => observer.disconnect();
-  }, [pageNumber, scale, isFullscreen]);
-
-  if (isFullscreen) {
-    setTimeout(highlightText, 800);
-  } else {
-    highlightText();
-  }
   
+
+
+
+
+
+
 
   return (
     <div className="h-full flex flex-col bg-muted/20">
@@ -370,7 +383,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
             ref={containerRef}
           >
             <div className="relative inline-block" style={{ border: "" }}>
-              <Document
+              {/* <Document
                 // file={data.annotatedPdfUrl}
                 file={AnnualReport}
                 onLoadSuccess={onDocumentLoadSuccess}
@@ -391,7 +404,30 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                   // onLoadSuccess={onPageLoadSuccess}
                   className="shadow-lg border border-border/20"
                 />
-              </Document>
+              </Document> */}
+
+
+
+
+<Document
+  file={AnnualReport}
+  onLoadSuccess={onDocumentLoadSuccess}
+  key="main-pdf"
+>
+  <Page
+    key={`page_${pageNumber}_${scale}`} // ensures proper remount only when needed
+    pageNumber={pageNumber}
+    scale={scale}
+    renderAnnotationLayer={false}
+    renderTextLayer={true}
+    className="shadow-lg border border-border/20"
+  />
+</Document>
+
+
+
+
+
 
               {/* Sentence Highlights */}
               {/* {highlights
@@ -531,7 +567,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
           <div className="flex-1 overflow-auto p-4">
             <div className="flex justify-center">
               <div className="relative inline-block">
-                {/* <Document
+                <Document
                   // file={data.annotatedPdfUrl}
                   file={AnnualReport}
                 >
@@ -540,29 +576,10 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                     scale={2.0}
                     className="shadow-lg"
                   />
-                </Document> */}
-
-<Document
-  file={AnnualReport}
-  onLoadSuccess={onDocumentLoadSuccess}
-  loading={<div className="flex items-center justify-center h-64"><div className="text-muted-foreground">Loading PDF...</div></div>}
-  error={<div className="flex items-center justify-center h-64"><div className="text-destructive">Failed to load PDF</div></div>}
->
-  {Array.from({ length: numPages || 0 }).map((_, index) => (
-    <Page
-      key={`page_${index + 1}`}
-      pageNumber={index + 1}
-      scale={scale}
-      renderTextLayer
-      renderAnnotationLayer
-      className="shadow-lg border border-border/20 mb-4"
-    />
-  ))}
-</Document>
-
+                </Document>
 
                 {/* Fullscreen Sentence Highlights */}
-                {/* {sentenceHighlights
+                {sentenceHighlights
                   .filter((h) => h.page === pageNumber)
                   .map((highlight) => (
                     <div
@@ -581,10 +598,10 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                         height: highlight.height * 2.0,
                       }}
                     />
-                  ))} */}
+                  ))}
 
                 {/* Fullscreen Markers */}
-                {/* {currentPageFlags.map((flag) => (
+                {currentPageFlags.map((flag) => (
                   <button
                     key={`fs-${flag.id}`}
                     onClick={() => handleMarkerClick(flag)}
@@ -602,7 +619,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                     }}
                     title={flag.title}
                   />
-                ))} */}
+                ))}
               </div>
             </div>
           </div>

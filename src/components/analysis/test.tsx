@@ -22,9 +22,6 @@ import {
   AreaHighlight,
 } from "react-pdf-highlighter";
 
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
-
 import AnnualReport from "../../assets/pdf/AnnualReport.pdf";
 
 import * as pdfjsLib from "pdfjs-dist";
@@ -198,50 +195,26 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   }
 
   // ✅ Reapply highlights after every PDF re-render (zoom, pan, resize)
-  // useEffect(() => {
-  //   const observer = new MutationObserver(() => {
-  //     // Whenever React-PDF re-renders the text layer, rerun highlight logic
-  //     highlightText();
-  //   });
-
-  //   // Watch all text layers for mutation (React-PDF replaces them on zoom)
-  //   const container = document.querySelector(".react-pdf__Document");
-  //   if (container) {
-  //     observer.observe(container, {
-  //       childList: true,
-  //       subtree: true,
-  //     });
-  //   }
-
-  //   // Initial highlight on mount
-  //   highlightText();
-
-  //   return () => observer.disconnect();
-  // }, [pageNumber, scale]);
-
   useEffect(() => {
     const observer = new MutationObserver(() => {
+      // Whenever React-PDF re-renders the text layer, rerun highlight logic
       highlightText();
     });
 
-    // Watch *all* PDF documents (normal + fullscreen)
-    const containers = document.querySelectorAll(".react-pdf__Document");
-    containers.forEach((container) => {
-      observer.observe(container, { childList: true, subtree: true });
-    });
+    // Watch all text layers for mutation (React-PDF replaces them on zoom)
+    const container = document.querySelector(".react-pdf__Document");
+    if (container) {
+      observer.observe(container, {
+        childList: true,
+        subtree: true,
+      });
+    }
 
     // Initial highlight on mount
     highlightText();
 
     return () => observer.disconnect();
-  }, [pageNumber, scale, isFullscreen]);
-
-  if (isFullscreen) {
-    setTimeout(highlightText, 800);
-  } else {
-    highlightText();
-  }
-  
+  }, [pageNumber, scale]);
 
   return (
     <div className="h-full flex flex-col bg-muted/20">
@@ -542,24 +515,30 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                   />
                 </Document> */}
 
-<Document
-  file={AnnualReport}
-  onLoadSuccess={onDocumentLoadSuccess}
-  loading={<div className="flex items-center justify-center h-64"><div className="text-muted-foreground">Loading PDF...</div></div>}
-  error={<div className="flex items-center justify-center h-64"><div className="text-destructive">Failed to load PDF</div></div>}
->
-  {Array.from({ length: numPages || 0 }).map((_, index) => (
-    <Page
-      key={`page_${index + 1}`}
-      pageNumber={index + 1}
-      scale={scale}
-      renderTextLayer
-      renderAnnotationLayer
-      className="shadow-lg border border-border/20 mb-4"
-    />
-  ))}
-</Document>
-
+                <Document
+                  // file={data.annotatedPdfUrl}
+                  file={AnnualReport}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  loading={
+                    <div className="flex items-center justify-center h-64">
+                      <div className="text-muted-foreground">
+                        Loading PDF...
+                      </div>
+                    </div>
+                  }
+                  error={
+                    <div className="flex items-center justify-center h-64">
+                      <div className="text-destructive">Failed to load PDF</div>
+                    </div>
+                  }
+                >
+                  <Page
+                    pageNumber={pageNumber}
+                    scale={scale}
+                    // onLoadSuccess={onPageLoadSuccess}
+                    className="shadow-lg border border-border/20"
+                  />
+                </Document>
 
                 {/* Fullscreen Sentence Highlights */}
                 {/* {sentenceHighlights
