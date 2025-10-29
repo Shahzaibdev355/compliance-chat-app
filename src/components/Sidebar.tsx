@@ -5,7 +5,6 @@ import { useChatHistory } from '@/contexts/ChatHistoryContext';
 import SearchChatDialog from './SearchChatDialog';
 import ChatEntryPopup from './ChatEntryPopup';
 import { useNavigate } from 'react-router-dom';
-import taxtroLogo from '@/assets/taxtro-logo.png';
 import taxtroIcon from '@/assets/taxtro-icon.png';
 import {
   MessageSquare,
@@ -59,19 +58,16 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out`}>
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center flex-1 overflow-hidden">
-          {collapsed ? (
-            <img 
-              src={taxtroIcon} 
-              alt="TaxTro" 
-              className="h-8 w-8 animate-fade-in transition-all duration-300 ease-in-out"
-            />
-          ) : (
-            <img 
-              src={taxtroLogo} 
-              alt="TaxTro AI" 
-              className="h-10 w-auto animate-fade-in transition-all duration-300 ease-in-out"
-            />
+        <div className="flex items-center gap-3 flex-1 overflow-hidden">
+          <img 
+            src={taxtroIcon} 
+            alt="TaxTro" 
+            className="h-10 w-10 transition-all duration-300 ease-in-out"
+          />
+          {!collapsed && (
+            <span className="font-semibold text-lg animate-fade-in transition-opacity duration-300 ease-in-out">
+              Taxtro
+            </span>
           )}
         </div>
         {onToggleCollapse && (

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate, useLocation } from 'react-router-dom';
 import taxtroLogo from '@/assets/taxtro-logo.png';
 
 // Validation schemas
@@ -30,6 +31,8 @@ interface AuthPageProps {
 
 const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -61,11 +64,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     const VALID_PASSWORD = 'taxtro-testing';
     
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+      onLogin();
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-      onLogin();
+      const from = (location.state as any)?.from?.pathname || "/";
+      navigate(from, { replace: true });
     } else {
       setErrors({ 
         email: 'Invalid email or password',
@@ -92,11 +97,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       return;
     }
     
+    onLogin();
     toast({
       title: "Account created!",
       description: "Your account has been successfully created.",
     });
-    onLogin();
+    navigate("/", { replace: true });
   };
 
   const handleGoogleSignIn = () => {
