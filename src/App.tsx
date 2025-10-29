@@ -13,6 +13,16 @@ import AnalysisResultPage from "./pages/AnalysisResultPage";
 import LibraryPage from "./pages/LibraryPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 
+import { pdfjs } from 'react-pdf';
+
+// ✅ Vite-compatible: use new URL() to resolve path
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
+
+
+
 const queryClient = new QueryClient();
 
 const AppRoutes = ({ onLogout }: { onLogout: () => void }) => {

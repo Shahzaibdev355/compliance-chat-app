@@ -46,9 +46,12 @@ const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
+
         <ResizablePanelGroup direction="horizontal" className="h-full">
+
+
           {/* PDF Viewer */}
-          <ResizablePanel defaultSize={42} minSize={30}>
+          <ResizablePanel defaultSize={42} minSize={30} style={{border: ''}}>
             <PdfViewer
               data={mockAnalysisData}
               selectedFlagId={selectedFlagId}

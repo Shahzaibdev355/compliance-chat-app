@@ -15,6 +15,19 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
+
+import PdfView from '@/components/PdfView';
+// import { pdfjs } from 'react-pdf';
+
+
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   'pdfjs-dist/build/pdf.worker.min.mjs',
+//   import.meta.url,
+// ).toString();
+
+
+
+
 interface AgentAndrewPageProps {
   onBack: () => void;
 }
@@ -113,7 +126,8 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
         {!results ? (
           <div className="max-w-2xl mx-auto space-y-6">
             {/* File Upload Area */}
-            <Card>
+
+            <Card  style={{border: ''}}>
               <CardContent className="p-8">
                 <div
                   className={`border-2 border-dashed rounded-lg p-6 md:p-12 text-center transition-colors ${
@@ -167,6 +181,8 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
               </CardContent>
             </Card>
 
+            {/* <PdfView /> */}
+
             {/* Optional Query */}
             <Card>
               <CardContent className="p-6">
@@ -193,6 +209,8 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
                 {isProcessing ? 'Processing...' : 'Proceed with Analysis'}
               </Button>
             </div>
+
+
 
             {/* Processing Progress */}
             {isProcessing && (
