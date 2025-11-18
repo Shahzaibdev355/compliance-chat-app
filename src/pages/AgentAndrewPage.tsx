@@ -114,7 +114,7 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
             <span className="hidden sm:inline">Back</span>
           </Button>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">Agent Andrew</h1>
+            <h1 className="text-xl md:text-2xl font-bold">Agent Lexa</h1>
             <p className="text-muted-foreground text-sm md:text-base">
               AI-powered document compliance analysis for Income Tax laws
             </p>
