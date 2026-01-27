@@ -7,46 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useChatHistory } from '@/contexts/ChatHistoryContext';
 import { ArrowLeft, Crown, Send, Mic, Plus, FileText, Search } from 'lucide-react';
-
 import { askTaxGPT } from "@/api/taxApi";
-
-// interface Message {
-//   id: string;
-//   type: 'user' | 'ai';
-//   content: string;
-//   timestamp: Date;
-// }
-
-
-
-interface Reference {
-  title: string;
-  content?: string;
-  type?: string;
-}
-
-interface PDFDoc {
-  Title: string;
-  File: string;
-  URL: string;
-}
-
-interface Message {
-  id: string;
-  type: 'user' | 'ai';
-  content: string;
-  timestamp: Date;
-
-  isTyping?: boolean;
-
-  isComplete?: boolean;
-
-  //AI-only fields
-  summary?: string;
-  recommendation?: string;
-  references?: Reference[];
-  pdfs?: PDFDoc[];
-}
+import type { Message, Reference, PDFDoc } from '@/types/chat';
 
 
 
