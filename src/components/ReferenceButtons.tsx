@@ -5,20 +5,13 @@ import { ReferencePopup } from './ReferencePopup';
 import { SummaryPopup } from './SummaryPopup';
 import { RecommendationPopup } from './RecommendationPopup';
 import { PDFDownloadPopup } from './PDFDownloadPopup';
-
-interface Reference {
-  id: string;
-  title: string;
-  provisionNumber: string;
-  type: string;
-  content: string;
-}
+import type { Reference, PDFDoc } from '@/types/chat';
 
 interface ReferenceButtonsProps {
   references: Reference[];
   summary: string;
   recommendation: string;
-  availablePDFs: { id: string; name: string; url: string }[];
+  availablePDFs: PDFDoc[];
 }
 
 export const ReferenceButtons: React.FC<ReferenceButtonsProps> = ({

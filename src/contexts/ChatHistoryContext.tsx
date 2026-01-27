@@ -1,11 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-export interface Message {
-  id: string;
-  type: 'user' | 'ai';
-  content: string;
-  timestamp: Date;
-}
+import type { Message } from '@/types/chat';
 
 export interface ChatEntry {
   id: string;
@@ -14,6 +8,8 @@ export interface ChatEntry {
   timestamp: Date;
   messages: Message[];
 }
+
+export type { Message } from '@/types/chat';
 
 interface ChatHistoryContextType {
   chatHistory: ChatEntry[];
