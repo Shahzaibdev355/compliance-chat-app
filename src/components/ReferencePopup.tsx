@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 interface Reference {
   id: string;
   title: string;
+  provisionNumber: string;
+  type: string;
   content: string;
-  type: 'SRO' | 'Rule' | 'Section';
 }
 
 interface ReferencePopupProps {
@@ -24,29 +25,30 @@ export const ReferencePopup: React.FC<ReferencePopupProps> = ({
   onClose,
 }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] animate-scale-in">
-        <DialogHeader className="pb-4 border-b border-border/20">
-          <div className="flex items-center justify-between">
+    <Dialog open={isOpen} onOpenChange={onClose} >
+      <DialogContent className="max-w-2xl max-h-[80vh] animate-scale-in" >
+        <DialogHeader className="pb-4 border-b border-border/20" >
+          <div className="flex items-center justify-between" >
             <div className="flex items-center gap-3">
               <BookOpen className="h-5 w-5 text-primary" />
               <div>
                 <DialogTitle className="text-lg font-semibold">
-                  {reference.title}
+                  {reference.provisionNumber}
                 </DialogTitle>
-                <Badge variant="secondary" className="mt-1">
+                <Badge variant="secondary" className="mt-1" style={{border: ''}}>
                   {reference.type}
                 </Badge>
               </div>
             </div>
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
               className="h-8 w-8 p-0"
+              
             >
               <X className="h-4 w-4" />
-            </Button>
+            </Button> */}
           </div>
         </DialogHeader>
         

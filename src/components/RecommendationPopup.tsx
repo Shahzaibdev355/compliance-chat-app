@@ -4,14 +4,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileCheck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface SummaryPopupProps {
-  summary: string;
+interface RecommendationPopupProps {
+  recommendation: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const SummaryPopup: React.FC<SummaryPopupProps> = ({
-  summary,
+export const RecommendationPopup: React.FC<RecommendationPopupProps> = ({
+  recommendation,
   isOpen,
   onClose,
 }) => {
@@ -23,7 +23,7 @@ export const SummaryPopup: React.FC<SummaryPopupProps> = ({
             <div className="flex items-center gap-3">
               <FileCheck className="h-5 w-5 text-primary" />
               <DialogTitle className="text-lg font-semibold">
-                Summary
+                Recommendation
               </DialogTitle>
             </div>
             {/* <Button
@@ -43,7 +43,7 @@ export const SummaryPopup: React.FC<SummaryPopupProps> = ({
               <h4 className="font-medium mb-2 text-primary">Key Points</h4>
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {summary}
+                  {recommendation}
                 </div>
               </div>
             </div>

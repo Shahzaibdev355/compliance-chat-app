@@ -8,12 +8,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useChatHistory } from '@/contexts/ChatHistoryContext';
 import { ArrowLeft, Crown, Send, Mic, Plus, FileText, Search } from 'lucide-react';
 
+import { askTaxGPT } from "@/api/taxApi";
+
+// interface Message {
+//   id: string;
+//   type: 'user' | 'ai';
+//   content: string;
+//   timestamp: Date;
+// }
+
+
+
+interface Reference {
+  title: string;
+  content?: string;
+  type?: string;
+}
+
+interface PDFDoc {
+  Title: string;
+  File: string;
+  URL: string;
+}
+
 interface Message {
   id: string;
   type: 'user' | 'ai';
   content: string;
   timestamp: Date;
+
+  isTyping?: boolean;
+
+  isComplete?: boolean;
+
+  //AI-only fields
+  summary?: string;
+  recommendation?: string;
+  references?: Reference[];
+  pdfs?: PDFDoc[];
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 interface HomePageProps {
   onAccessAgent: () => void;
@@ -66,35 +111,268 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
     }
   };
 
-  const handleSendMessage = (content: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content,
-      timestamp: new Date()
-    };
+  // const handleSendMessage = (content: string) => {
+  //   const userMessage: Message = {
+  //     id: Date.now().toString(),
+  //     type: 'user',
+  //     content,
+  //     timestamp: new Date()
+  //   };
 
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+  //   const updatedMessages = [...messages, userMessage];
+  //   setMessages(updatedMessages);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: `Thank you for your question: "${content}". As your AI tax advisor, I'm here to help with compliance matters, tax planning, and regulatory questions. This is a demo response - in a real implementation, this would be connected to a sophisticated AI model trained on tax law and regulations.`,
-        timestamp: new Date()
-      };
-      const finalMessages = [...updatedMessages, aiMessage];
-      setMessages(finalMessages);
-      
-      // Save to chat history only for new chats or first message
-      if (!currentChatId || messages.length === 0) {
-        addChatEntry(content, finalMessages);
-        setCurrentChatId(Date.now().toString());
-      }
-    }, 1000);
+  //   // Simulate AI response
+  //   setTimeout(() => {
+  //     const aiMessage: Message = {
+  //       id: (Date.now() + 1).toString(),
+  //       type: 'ai',
+  //       content: `Thank you for your question: "${content}". As your AI tax advisor, I'm here to help with compliance matters, tax planning, and regulatory questions. This is a demo response - in a real implementation, this would be connected to a sophisticated AI model trained on tax law and regulations.`,
+  //       timestamp: new Date()
+  //     };
+  //     const finalMessages = [...updatedMessages, aiMessage];
+  //     setMessages(finalMessages);
+
+  //     // Save to chat history only for new chats or first message
+  //     if (!currentChatId || messages.length === 0) {
+  //       addChatEntry(content, finalMessages);
+  //       setCurrentChatId(Date.now().toString());
+  //     }
+  //   }, 1000);
+
+
+
+  // };
+
+
+
+
+
+
+  // const askTaxGPT = async (question: string) => {
+  //  const res = await fetch('http://127.0.0.1:8000/ask', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ question }),
+  //   });
+
+  //   if (!res.ok) {
+  //     throw new Error('Failed to fetch AI response');
+  //   }
+
+  //   return res.json();
+  // };
+
+
+
+  const addMessage = (message: Omit<Message, "timestamp">) => {
+    setMessages(prev => [
+      ...prev,
+      {
+        ...message,
+        timestamp: new Date(),
+      },
+    ]);
   };
+
+
+  const parseLegalReferences = (raw: string) => {
+    if (!raw) return [];
+
+    const blocks = raw.split("\n\n").filter(Boolean);
+
+    console.log("Parsing legal references:", blocks);
+
+    return blocks.map((block, index) => {
+      const titleMatch = block.match(/\*\*Title:\*\*\s*(.*)/);
+      const typeMatch = block.match(/\*\*Provision Type:\*\*\s*(.*)/);
+      const numberMatch = block.match(/\*\*Provision Number:\*\*\s*(.*)/);
+      const descMatch = block.match(/\*\*Short Description:\*\*\s*(.*)/);
+
+     
+
+      return {
+        id: `${index + 1}`,
+        title: titleMatch?.[1]?.trim() || "Legal Reference",
+        provisionNumber: numberMatch?.[1]?.trim() || "Provision Number",
+        type: typeMatch?.[1]?.trim() || "Provision Type",
+        content: descMatch?.[1]?.trim() || "No description available",
+      };
+    });
+  };
+
+
+
+  const handleSendMessage = async (question: string) => {
+    // 1️⃣ User message
+    addMessage({
+      id: crypto.randomUUID(),
+      type: "user",
+      content: question,
+    });
+  
+    // 2️⃣ TEMP AI loader message
+    const typingMessageId = crypto.randomUUID();
+  
+    addMessage({
+      id: typingMessageId,
+      type: "ai",
+      content: "AI is generating response...",
+      isTyping: true,
+    });
+  
+    try {
+      const data = await askTaxGPT(question);
+  
+      const parsedReferences = parseLegalReferences(
+        data.Applicable_Legal_References
+      );
+  
+      const parsedPDFs = (data.Source_Documents || []).map(
+        (doc: any, index: number) => ({
+          id: `${index + 1}`,
+          name: doc.Title,
+          url: doc.URL,
+        })
+      );
+  
+      // 3️⃣ Replace loader with real response
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === typingMessageId
+            ? {
+                ...msg,
+                content: data.Answer,
+                isTyping: false,
+                isComplete: false, // ✅ REQUIRED
+                summary: data.Summary,
+                recommendation: data.Recommendation,
+                references: parsedReferences,
+                pdfs: parsedPDFs,
+              }
+            : msg
+        )
+      );
+      // setMessages(prev =>
+      //   prev.map(msg =>
+      //     msg.id === typingMessageId
+      //       ? {
+      //           ...msg,
+      //           content: data.Answer,
+      //           isTyping: false,
+      //           summary: data.Summary,
+      //           recommendation: data.Recommendation,
+      //           references: parsedReferences,
+      //           pdfs: parsedPDFs,
+      //         }
+      //       : msg
+      //   )
+      // );
+    } catch (error) {
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === typingMessageId
+            ? {
+                ...msg,
+                content: "❌ Something went wrong while fetching the response.",
+                isTyping: false,
+              }
+            : msg
+        )
+      );
+    }
+  };
+  
+
+  const markMessageComplete = (id: string) => {
+    setMessages(prev =>
+      prev.map(msg =>
+        msg.id === id
+          ? { ...msg, isComplete: true }
+          : msg
+      )
+    );
+  };
+  
+
+
+
+
+
+
+  // const handleSendMessage = async (question: string) => {
+  //   // 1️⃣ user message
+  //   addMessage({
+  //     id: crypto.randomUUID(),
+  //     type: "user",
+  //     content: question,
+  //   });
+
+  //   try {
+  //     // 2️⃣ API call
+  //     const data = await askTaxGPT(question);
+
+  //     const parsedReferences = parseLegalReferences(
+  //       data.Applicable_Legal_References
+  //     );
+
+  //     const parsedPDFs = (data.Source_Documents || []).map(
+  //       (doc: any, index: number) => ({
+  //         id: `${index + 1}`,
+  //         name: doc.Title,
+  //         url: doc.URL,
+  //       })
+  //     );
+
+  //     // 3️⃣ AI message
+  //     addMessage({
+  //       id: crypto.randomUUID(),
+  //       type: "ai",
+  //       content: data.Answer,
+  //       summary: data.Summary,
+  //       recommendation: data.Recommendation,
+  //       references: parsedReferences,
+  //       pdfs: parsedPDFs,
+  //     });
+  //   } catch (error) {
+  //     addMessage({
+  //       id: crypto.randomUUID(),
+  //       type: "ai",
+  //       content: "❌ Something went wrong while fetching the response.",
+  //     });
+  //   }
+  // };
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Welcome Screen (First Load)
   if (currentMode === 'gpt' && messages.length === 0) {
@@ -133,7 +411,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
                   Choose how you'd like to interact with our AI system
                 </p>
               </div>
-              
+
               {/* Centered Input */}
               <form onSubmit={handleCenteredSubmit} className="w-full max-w-2xl">
                 <div className="relative">
@@ -235,7 +513,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Back</span>
             </Button>
-            
+
             <Select value={selectedModel} onValueChange={setSelectedModel}>
               <SelectTrigger className="w-32 md:w-40">
                 <SelectValue />
@@ -252,6 +530,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
         <ChatInterface
           messages={messages}
           onSendMessage={handleSendMessage}
+          onTypingComplete={markMessageComplete}
         />
       </div>
     </div>

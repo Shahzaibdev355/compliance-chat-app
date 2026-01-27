@@ -20,14 +20,26 @@ export const PDFDownloadPopup: React.FC<PDFDownloadPopupProps> = ({
   isOpen,
   onClose,
 }) => {
-  const handleDownload = (pdf: PDF) => {
-    // Create a temporary anchor element to trigger download
-    const link = document.createElement('a');
-    link.href = pdf.url;
-    link.download = pdf.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // const handleDownload = (pdf: PDF) => {
+
+  //   // Create a temporary anchor element to trigger download
+  //   const link = document.createElement('a');
+  //   link.href = pdf.url;
+  //   link.download = pdf.name;
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
+
+
+  const handleDownload = (
+    e: React.MouseEvent,
+    pdf: PDF
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+  
+    window.open(pdf.url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -41,14 +53,14 @@ export const PDFDownloadPopup: React.FC<PDFDownloadPopupProps> = ({
                 Available Downloads
               </DialogTitle>
             </div>
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
               className="h-8 w-8 p-0"
             >
               <X className="h-4 w-4" />
-            </Button>
+            </Button> */}
           </div>
         </DialogHeader>
         
@@ -59,7 +71,8 @@ export const PDFDownloadPopup: React.FC<PDFDownloadPopupProps> = ({
                 key={pdf.id}
                 variant="ghost"
                 className="w-full justify-start h-auto p-3 hover:bg-muted/50 transition-colors"
-                onClick={() => handleDownload(pdf)}
+                // onClick={() => handleDownload(pdf)}
+                onClick={(e) => handleDownload(e, pdf)}
               >
                 <FileText className="h-4 w-4 mr-3 text-muted-foreground" />
                 <div className="text-left">

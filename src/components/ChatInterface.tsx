@@ -10,23 +10,69 @@ import {
   Copy,
   Languages,
   FileText,
-  Search as SearchIcon
+  Search as SearchIcon,
+  Loader2
 } from 'lucide-react';
 import { ReferenceButtons } from './ReferenceButtons';
+
+
+import Typewriter from 'typewriter-effect';
+
+// interface Message {
+//   id: string;
+//   type: 'user' | 'ai';
+//   content: string;
+//   timestamp: Date;
+// }
+
+
+
+interface Reference {
+  title: string;
+  content?: string;
+  type?: string;
+}
+
+interface PDFDoc {
+  id: string;
+  name: string;
+  url: string;
+}
+
 
 interface Message {
   id: string;
   type: 'user' | 'ai';
   content: string;
   timestamp: Date;
+
+  isTyping?: boolean; 
+  isComplete?: boolean;  // 👈 typing finished
+
+  summary?: string;
+  recommendation?: string;
+  references?: Reference[];
+  pdfs?: PDFDoc[];
 }
+
+
+
+
 
 interface ChatInterfaceProps {
   messages: Message[];
   onSendMessage: (message: string) => void;
+  onTypingComplete: (id: string) => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }) => {
+// const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }) => {
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  messages,
+  onSendMessage,
+  onTypingComplete,
+}) => {
+
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -105,8 +151,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }
     }
   ];
 
-  const getMockSummary = () => 
+  const getMockSummary = () =>
     'Key takeaways from the tax advisory response:\n\n• Ensure compliance with SRO 123/2023 for proper documentation\n• Rule 45A allows deductions with proper form submission\n• Section 80C provides up to Rs. 1,50,000 deduction for eligible investments\n• Submit all required forms within specified deadlines\n• Maintain proper records for audit purposes';
+
+
+  const getMockReccomendation = () =>
+    'Key takeaways from the tax advisory response:\n\n• Ensure compliance with SRO 123/2023 for proper documentation\n• Rule 45A allows deductions with proper form submission\n• Section 80C provides up to Rs. 1,50,000 deduction for eligible investments\n• Submit all required forms within specified deadlines\n• Maintain proper records for audit purposes';
+
 
   const getMockPDFs = () => [
     { id: '1', name: 'Tax Compliance Guide 2024.pdf', url: '/pdfs/tax-guide-2024.pdf' },
@@ -116,8 +167,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }
 
   return (
     <div className="flex-1 flex flex-col h-full">
+
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4" >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-4">
@@ -134,14 +187,45 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                  message.type === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
-                }`}
+
+                className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.type === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-foreground'
+                  }`}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
-                {message.type === 'ai' && (
+                {/* <p className="whitespace-pre-wrap" style={{ border: '3px solid red' }}>{message.content}</p> */}
+
+                {message.type === "ai" ? (
+                  message.isTyping ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">
+                        AI is generating response...
+                      </span>
+                    </div>
+                  ) : (
+                    <Typewriter
+                    key={message.id} // ✅ prevents restart on re-render
+                      options={{ cursor: "|" }}
+                      onInit={(typewriter) => {
+                        typewriter
+                          .changeDelay(25)
+                          .typeString(message.content)
+                          .callFunction(() => {
+                            onTypingComplete(message.id); // ✅ THIS WAS MISSING
+                          })
+                          .start();
+                      }}
+                    />
+                  )
+                ) : (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                )}
+
+
+
+                {/* {message.type === 'ai' && ( */}
+                {message.type === 'ai' && message.isComplete && (
                   <>
                     <div className="flex gap-2 mt-3 pt-2 border-t border-border/20">
                       <Button
@@ -166,12 +250,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage }
                         <Languages className="h-3 w-3" />
                       </Button>
                     </div>
+
                     {/* Reference Buttons */}
+
                     <ReferenceButtons
-                      references={getMockReferences()}
-                      summary={getMockSummary()}
-                      availablePDFs={getMockPDFs()}
+                      references={message.references || []}
+                      summary={message.summary || ""}
+                      recommendation={message.recommendation || ""}
+                      availablePDFs={message.pdfs || []}
+                      
                     />
+
+
                   </>
                 )}
               </div>
