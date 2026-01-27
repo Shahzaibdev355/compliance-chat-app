@@ -151,7 +151,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
       const titleMatch = block.match(/\*\*Title:\*\*\s*(.*)/);
       const typeMatch = block.match(/\*\*Provision Type:\*\*\s*(.*)/);
       const numberMatch = block.match(/\*\*Provision Number:\*\*\s*(.*)/);
-      const descMatch = block.match(/\*\*Short Description:\*\*\s*(.*)/);
+      const descMatch = block.match(/\*\*Detailed Description:\*\*\s*(.*)/);
 
      
 

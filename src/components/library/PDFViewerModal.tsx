@@ -37,14 +37,14 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
           <DialogTitle className="text-lg font-semibold truncate pr-8">
             {pdfName}
           </DialogTitle>
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             className="absolute right-4 top-4"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
-          </Button>
+          </Button> */}
         </DialogHeader>
         <div className="flex-1 h-full overflow-auto p-4">
           <iframe

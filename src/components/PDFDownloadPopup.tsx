@@ -44,7 +44,7 @@ export const PDFDownloadPopup: React.FC<PDFDownloadPopupProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md animate-scale-in">
+      <DialogContent className="w-fit max-w-fit animate-scale-in" > 
         <DialogHeader className="pb-4 border-b border-border/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -73,6 +73,7 @@ export const PDFDownloadPopup: React.FC<PDFDownloadPopupProps> = ({
                 className="w-full justify-start h-auto p-3 hover:bg-muted/50 transition-colors"
                 // onClick={() => handleDownload(pdf)}
                 onClick={(e) => handleDownload(e, pdf)}
+                style={{color: 'white'}}
               >
                 <FileText className="h-4 w-4 mr-3 text-muted-foreground" />
                 <div className="text-left">
