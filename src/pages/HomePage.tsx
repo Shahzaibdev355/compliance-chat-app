@@ -461,7 +461,7 @@ const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onL
                   onClick={onAccessAgent}
                   className="p-4 md:p-6 bg-card border border-border rounded-xl hover:bg-muted hover:border-primary/20 transition-all duration-300 text-left group"
                 >
-                  <h3 className="font-semibold mb-1 md:mb-2 group-hover:text-primary transition-colors text-sm md:text-base">Access Agent Andrew</h3>
+                  <h3 className="font-semibold mb-1 md:mb-2 group-hover:text-primary transition-colors text-sm md:text-base">Access Agent Lexa</h3>
                   <p className="text-xs md:text-sm text-muted-foreground">
                     Dedicated document compliance analysis with Income Tax law validation
                   </p>

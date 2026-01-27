@@ -108,10 +108,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             variant={currentMode === 'agent' ? 'default' : 'ghost'}
             className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} transition-all duration-300 ease-in-out`}
             onClick={onAccessAgent}
-            title={collapsed ? "Agent Andrew" : undefined}
+            title={collapsed ? "Agent Lexa" : undefined}
           >
             <FileCheck className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
-            {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Agent Andrew</span>}
+            {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Agent Lexa</span>}
           </Button>
         </div>
 
