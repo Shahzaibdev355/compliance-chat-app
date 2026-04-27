@@ -13,6 +13,9 @@ import type { LibraryFile } from '@/types/library';
 import LibraryFileCard from '@/components/library/LibraryFileCard';
 import PDFPreviewCard from '@/components/library/PDFPreviewCard';
 import PDFViewerModal from '@/components/library/PDFViewerModal';
+import { uploadPdf, deletePdf } from "@/api/taxApi";
+
+
 
 interface LibraryPageProps {
   onBack: () => void;
@@ -30,6 +33,10 @@ const formatFileSize = (bytes: number): string => {
 const STORAGE_KEY = 'library_pdfs';
 
 const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
+
+  const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [files, setFiles] = useState<LibraryFile[]>([]);
@@ -76,25 +83,62 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
     }
   };
 
-  const handleSave = () => {
+  // const handleSave = () => {
+  //   if (!pendingFile) return;
+
+  //   const newFile: LibraryFile = {
+  //     id: Date.now().toString(),
+  //     name: pendingFile.file.name,
+  //     type: 'pdf',
+  //     size: formatFileSize(pendingFile.file.size),
+  //     uploadDate: new Date(),
+  //     url: pendingFile.url,
+  //   };
+
+  //   setFiles((prev) => [newFile, ...prev]);
+  //   setPendingFile(null);
+  // };
+
+
+  const handleSave = async () => {
     if (!pendingFile) return;
 
-    const newFile: LibraryFile = {
-      id: Date.now().toString(),
-      name: pendingFile.file.name,
-      type: 'pdf',
-      size: formatFileSize(pendingFile.file.size),
-      uploadDate: new Date(),
-      url: pendingFile.url,
-    };
+    try {
+      setUploading(true);
 
-    setFiles((prev) => [newFile, ...prev]);
-    setPendingFile(null);
+      const uploaded = await uploadPdf(
+        pendingFile.file
+      );
+
+      const newFile = {
+        id: Date.now().toString(),
+        name: pendingFile.file.name,
+        type: "pdf",
+        size: formatFileSize(
+          pendingFile.file.size
+        ),
+        uploadDate: new Date(),
+        url: uploaded.url
+      };
+
+      setFiles(prev => [
+        newFile,
+        ...prev
+      ]);
+
+      setPendingFile(null);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
+
 
   const handleCancel = () => {
     if (pendingFile) {
-      URL.revokeObjectURL(pendingFile.url);
+      // URL.revokeObjectURL(pendingFile.url);
       setPendingFile(null);
     }
   };
@@ -112,15 +156,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
     document.body.removeChild(link);
   };
 
-  const handleDelete = (file: LibraryFile) => {
-    URL.revokeObjectURL(file.url);
-    setFiles((prev) => prev.filter((f) => f.id !== file.id));
-    // Update localStorage
-    const remaining = files.filter((f) => f.id !== file.id);
-    if (remaining.length === 0) {
-      localStorage.removeItem(STORAGE_KEY);
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+
+
+
+  const handleDelete = async (file: LibraryFile) => {
+    try {
+      setDeletingId(file.id);
+
+      await deletePdf(file.url);
+
+      setFiles(prev =>
+        prev.filter(f => f.id !== file.id)
+      );
+
+    } catch (err) {
+      console.log("error in deleting file");
+      console.error(err);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -207,6 +260,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                 fileName={pendingFile.file.name}
                 onSave={handleSave}
                 onCancel={handleCancel}
+                uploading={uploading}
               />
             </div>
           </div>
@@ -257,6 +311,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                       onView={handleView}
                       onDownload={handleDownload}
                       onDelete={handleDelete}
+                      deleting={deletingId === file.id}
                     />
                   ))}
                 </div>
@@ -270,6 +325,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                       onView={handleView}
                       onDownload={handleDownload}
                       onDelete={handleDelete}
+                      deleting={deletingId === file.id}
                     />
                   ))}
                 </div>

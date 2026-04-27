@@ -10,6 +10,14 @@ export const taxApi = axios.create({
 
 
 
+export const libraryApi = axios.create({
+    baseURL: "http://127.0.0.1:8000",
+    headers: {
+        "Content-Type": "multipart/form-data",
+    },
+});
+
+
 
 
 export const askTaxGPT = async (question: string) => {
@@ -40,3 +48,40 @@ export const askTaxGPT = async (question: string) => {
 
     return response.data;
 };
+
+
+
+export const uploadPdf = async (file: File) => {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await libraryApi.post(
+        "/upload-pdf",
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            }
+        }
+    );
+
+    return response.data;
+};
+
+
+// export const deletePdf = async (url:string)=>{
+//     return libraryApi.delete(
+//       "/delete-pdf",
+//       {
+//        data:{ url }
+//       }
+//     );
+//    }
+
+
+export const deletePdf = async (url: string) => {
+    return libraryApi.delete("/delete-pdf", {
+      params: { url }
+    });
+  };

@@ -7,12 +7,14 @@ interface PDFPreviewCardProps {
   fileName: string;
   onSave: () => void;
   onCancel: () => void;
+  uploading: boolean;
 }
 
 const PDFPreviewCard: React.FC<PDFPreviewCardProps> = ({
   fileName,
   onSave,
   onCancel,
+  uploading
 }) => {
   return (
     <Card className="animate-scale-in border-2 border-dashed border-primary/50 bg-primary/5">
@@ -36,6 +38,7 @@ const PDFPreviewCard: React.FC<PDFPreviewCardProps> = ({
               size="sm"
               className="flex-1"
               onClick={onCancel}
+              // disabled={uploading}
             >
               <X className="h-4 w-4 mr-1" />
               Cancel
@@ -44,9 +47,19 @@ const PDFPreviewCard: React.FC<PDFPreviewCardProps> = ({
               size="sm"
               className="flex-1"
               onClick={onSave}
+              disabled={uploading}
             >
-              <Save className="h-4 w-4 mr-1" />
-              Save
+              {uploading ? (
+                <>
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 rounded-full border-current border-t-transparent" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-1" />
+                  Save
+                </>
+              )}
             </Button>
           </div>
         </div>

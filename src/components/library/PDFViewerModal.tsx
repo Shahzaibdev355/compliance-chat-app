@@ -47,11 +47,16 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = ({
           </Button> */}
         </DialogHeader>
         <div className="flex-1 h-full overflow-auto p-4">
-          <iframe
+          {/* <iframe
             src={pdfUrl}
             title={pdfName}
             className="w-full h-full min-h-[70vh] rounded-lg border"
             style={{ border: 'none' }}
+          /> */}
+          <iframe
+            src={`https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`}
+            className="w-full min-h-[75vh]"
+            title={pdfName}
           />
         </div>
       </DialogContent>

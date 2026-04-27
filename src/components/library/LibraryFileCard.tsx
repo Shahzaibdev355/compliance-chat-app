@@ -10,6 +10,7 @@ interface LibraryFileCardProps {
   onView: (file: LibraryFile) => void;
   onDownload: (file: LibraryFile) => void;
   onDelete: (file: LibraryFile) => void;
+  deleting: boolean;
 }
 
 const formatDate = (date: Date) => {
@@ -30,6 +31,7 @@ const LibraryFileCard: React.FC<LibraryFileCardProps> = ({
   onView,
   onDownload,
   onDelete,
+  deleting
 }) => {
   if (viewMode === 'list') {
     return (
@@ -40,7 +42,12 @@ const LibraryFileCard: React.FC<LibraryFileCardProps> = ({
           <FileText className="h-8 w-8 text-red-500" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm truncate">{file.name}</p>
+          {/* <p className="font-medium text-sm truncate">{file.name}</p> */}
+
+          <p className="font-medium text-sm truncate">
+            {deleting ? "Deleting..." : file.name}
+          </p>
+
           <p className="text-xs text-muted-foreground">
             {file.size} • {formatDate(file.uploadDate)}
           </p>
@@ -71,13 +78,18 @@ const LibraryFileCard: React.FC<LibraryFileCardProps> = ({
           <Button
             size="sm"
             variant="ghost"
+            disabled={deleting}
             onClick={(e) => {
               e.stopPropagation();
               onDelete(file);
             }}
             title="Delete PDF"
           >
-            <Trash2 className="h-4 w-4" />
+            {deleting ? (
+              <div className="animate-spin h-4 w-4 border-2 rounded-full border-current border-t-transparent" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -90,7 +102,7 @@ const LibraryFileCard: React.FC<LibraryFileCardProps> = ({
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="relative">
             <FileText className="h-8 w-8 text-red-500" />
-            <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute -top-1 -right- opacity-0 group-hover:opacity-100 transition-opacity" style={{ right: '-7.25rem' }}>
               <div className="flex space-x-1">
                 <Button
                   size="sm"
@@ -115,6 +127,23 @@ const LibraryFileCard: React.FC<LibraryFileCardProps> = ({
                   title="Download PDF"
                 >
                   <Download className="h-3 w-3" />
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={deleting}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(file);
+                  }}
+                  title="Delete PDF"
+                >
+                  {deleting ? (
+                    <div className="animate-spin h-4 w-4 border-2 rounded-full border-current border-t-transparent" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
