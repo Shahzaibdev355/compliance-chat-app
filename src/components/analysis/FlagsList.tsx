@@ -28,7 +28,8 @@ const FlagsList: React.FC<FlagsListProps> = ({
 
   // Filter and sort flags
   const filteredFlags = flags
-    .filter(flag => !filteredColor || flag.color === filteredColor)
+    // .filter(flag => !filteredColor || flag.color === filteredColor)
+    .filter(flag => !filteredColor || flag.flag === filteredColor)
     .sort((a, b) => a.severity - b.severity);
 
   const toggleExpanded = (flagId: string) => {
@@ -110,22 +111,28 @@ const FlagsList: React.FC<FlagsListProps> = ({
 
   const getColorClass = (color: string) => {
     switch (color) {
-      case 'red': return 'bg-red-500';
-      case 'yellow': return 'bg-yellow-500';
-      case 'green': return 'bg-green-500';
+      case 'Red': return 'bg-red-500';
+      case 'Yellow': return 'bg-yellow-500';
+      case 'Green': return 'bg-green-500';
       case 'blue': return 'bg-blue-500';
       default: return 'bg-gray-500';
     }
   };
 
-  const getSeverityLabel = (severity: number) => {
-    if (severity <= 2) return 'Critical';
-    if (severity <= 4) return 'Warning';
+  // const getSeverityLabel = (severity: number) => {
+  //   if (severity <= 2) return 'Critical';
+  //   if (severity <= 4) return 'Warning';
+  //   return 'Info';
+  // };
+
+  const getSeverityLabel = (flag: string) => {
+    if (flag === 'Red') return 'Critical';
+    if (flag === 'Yellow') return 'Warning';
     return 'Info';
-  };
+};
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" style={{border: ''}}>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
           {filteredFlags.map((flag) => {
@@ -146,23 +153,23 @@ const FlagsList: React.FC<FlagsListProps> = ({
                   onClick={() => onFlagClick(flag.id)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${getColorClass(flag.color)}`} />
+                    <div className={`w-3 h-3 rounded-full ${getColorClass(flag.flag)}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className={`font-medium text-sm ${isResolved ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                          {flag.title}
+                          {flag.reason}
                         </h4>
-                        <Badge variant="outline" className="text-xs">
+                        {/* <Badge variant="outline" className="text-xs">
                           Page {flag.page}
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
                           {flag.confidence}%
-                        </Badge>
+                        </Badge> */}
                         <Badge 
-                          variant={flag.severity <= 2 ? "destructive" : flag.severity <= 4 ? "default" : "secondary"}
+                           variant={flag.flag === 'Red' ? "destructive" : flag.flag === 'Yellow' ? "default" : "secondary"}
                           className="text-xs"
                         >
-                          {getSeverityLabel(flag.severity)}
+                          {getSeverityLabel(flag.flag)}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1">

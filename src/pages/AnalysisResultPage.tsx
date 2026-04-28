@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PdfViewer from '@/components/analysis/PdfViewer';
 import ResultsPanel from '@/components/analysis/ResultsPanel';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { mockAnalysisData } from '@/data/mockAnalysisData';
+
 
 interface AnalysisResultPageProps {
   onBack: () => void;
@@ -13,6 +14,9 @@ interface AnalysisResultPageProps {
 const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
   const [selectedFlagId, setSelectedFlagId] = useState<string | null>(null);
   const [filteredColor, setFilteredColor] = useState<string | null>(null);
+
+  const [analysisData, setAnalysisData] = useState(null);
+  const [showLoading, setShowLoading] = useState(true);
 
   const handleMarkerClick = (flagId: string) => {
     setSelectedFlagId(flagId);
@@ -26,6 +30,22 @@ const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
   const handlePieSegmentClick = (color: string) => {
     setFilteredColor(filteredColor === color ? null : color);
   };
+
+
+  useEffect(() => {
+    const data = localStorage.getItem("auditResults");
+
+    if (data) {
+      setAnalysisData(JSON.parse(data));
+    }
+
+    const timer = setTimeout(() => {
+      setShowLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -45,23 +65,74 @@ const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
 
-        <ResizablePanelGroup direction="horizontal" className="h-full">
+        {/* Loading Blur Overlay */}
+        {showLoading && (
+          <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center">
+            <div className="bg-background rounded-2xl p-10 shadow-xl text-center">
+              <div className="animate-pulse text-xl font-semibold mb-3">
+                Analyzing Your PDF...
+              </div>
+
+              <p className="text-muted-foreground">
+                Running compliance checks and extracting flags
+              </p>
+            </div>
+          </div>
+        )}
 
 
-          {/* PDF Viewer */}
-          <ResizablePanel defaultSize={42} minSize={30} style={{border: ''}}>
+        {/* Only render panels once data exists */}
+        {analysisData && (
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+
+            {/* PDF SIDE */}
+            <ResizablePanel
+              defaultSize={42}
+              minSize={30}
+            >
+              <PdfViewer
+                data={analysisData}
+                selectedFlagId={selectedFlagId}
+                onMarkerClick={handleMarkerClick}
+              />
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            {/* RESULTS SIDE */}
+            <ResizablePanel
+              defaultSize={58}
+              minSize={40}
+            >
+              <ResultsPanel
+                data={analysisData}
+                selectedFlagId={selectedFlagId}
+                filteredColor={filteredColor}
+                onFlagClick={handleFlagClick}
+                onPieSegmentClick={handlePieSegmentClick}
+              />
+            </ResizablePanel>
+
+          </ResizablePanelGroup>
+        )}
+
+
+        {/* <ResizablePanelGroup direction="horizontal" className="h-full">
+
+
+          <ResizablePanel defaultSize={42} minSize={30} >
             <PdfViewer
               data={mockAnalysisData}
               selectedFlagId={selectedFlagId}
               onMarkerClick={handleMarkerClick}
             />
           </ResizablePanel>
-          
+
           <ResizableHandle withHandle />
-          
-          {/* Results Panel */}
+
+
           <ResizablePanel defaultSize={58} minSize={40}>
             <ResultsPanel
               data={mockAnalysisData}
@@ -71,7 +142,11 @@ const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
               onPieSegmentClick={handlePieSegmentClick}
             />
           </ResizablePanel>
-        </ResizablePanelGroup>
+
+
+        </ResizablePanelGroup> */}
+
+
       </div>
     </div>
   );

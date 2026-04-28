@@ -16,6 +16,9 @@ import {
 } from 'lucide-react';
 
 
+import { uploadAuditPdf } from "@/api/taxApi";
+
+
 import PdfView from '@/components/PdfView';
 // import { pdfjs } from 'react-pdf';
 
@@ -55,7 +58,7 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setUploadedFile(e.dataTransfer.files[0]);
     }
@@ -67,29 +70,91 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
     }
   };
 
+  // const handleProceed = async () => {
+  //   if (!uploadedFile) return;
+
+  //   setIsProcessing(true);
+  //   setProgress(0);
+
+  //   // Simulate processing
+  //   const interval = setInterval(() => {
+  //     setProgress(prev => {
+  //       if (prev >= 100) {
+  //         clearInterval(interval);
+  //         setIsProcessing(false);
+  //         // Store uploaded file data for analysis result page
+  //         localStorage.setItem('uploadedPdf', uploadedFile.name);
+  //         localStorage.setItem('additionalQuery', query);
+  //         // Navigate to analysis result page
+  //         navigate('/analysis-result');
+  //         return 100;
+  //       }
+  //       return prev + 10;
+  //     });
+  //   }, 200);
+  // };
+
+
   const handleProceed = async () => {
     if (!uploadedFile) return;
-    
-    setIsProcessing(true);
-    setProgress(0);
-    
-    // Simulate processing
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsProcessing(false);
-          // Store uploaded file data for analysis result page
-          localStorage.setItem('uploadedPdf', uploadedFile.name);
-          localStorage.setItem('additionalQuery', query);
-          // Navigate to analysis result page
-          navigate('/analysis-result');
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
+
+    try {
+      setIsProcessing(true);
+      setProgress(20);
+
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(interval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 400);
+
+
+      const result = await uploadAuditPdf(uploadedFile);
+
+      clearInterval(interval);
+      setProgress(100);
+
+      // save backend response
+      localStorage.setItem(
+        "auditResults",
+        JSON.stringify(result)
+      );
+
+      localStorage.setItem(
+        "session_id",
+        result.session_id
+      );
+
+      // local pdf preview url
+      // const pdfUrl = URL.createObjectURL(uploadedFile);
+
+      // localStorage.setItem(
+      //   "uploadedPdfUrl",
+      //   pdfUrl
+      // );
+
+      // Blob URL from backend
+      localStorage.setItem(
+        "uploadedPdfUrl",
+        result.pdf_url
+      );
+
+      setTimeout(() => {
+        navigate("/analysis-result");
+      }, 600);
+
+    } catch (err) {
+      console.error(err);
+    }
+    finally {
+      setIsProcessing(false);
+    }
   };
+
 
   const handleCancel = () => {
     setUploadedFile(null);
@@ -127,14 +192,13 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
           <div className="max-w-2xl mx-auto space-y-6">
             {/* File Upload Area */}
 
-            <Card  style={{border: ''}}>
+            <Card style={{ border: '' }}>
               <CardContent className="p-8">
                 <div
-                  className={`border-2 border-dashed rounded-lg p-6 md:p-12 text-center transition-colors ${
-                    dragActive 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
-                  }`}
+                  className={`border-2 border-dashed rounded-lg p-6 md:p-12 text-center transition-colors ${dragActive
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                    }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
@@ -201,7 +265,7 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
               <Button variant="outline" onClick={handleCancel} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleProceed}
                 disabled={!uploadedFile || isProcessing}
                 className="w-full sm:w-auto"

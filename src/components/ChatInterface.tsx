@@ -121,7 +121,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       options={{ cursor: "|" }}
                       onInit={(typewriter) => {
                         typewriter
-                          .changeDelay(25)
+                          .changeDelay(10)
                           .typeString(message.content)
                           .callFunction(() => {
                             onTypingComplete(message.id);

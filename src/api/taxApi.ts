@@ -10,6 +10,7 @@ export const taxApi = axios.create({
 
 
 
+
 export const libraryApi = axios.create({
     baseURL: "http://127.0.0.1:8000",
     headers: {
@@ -82,6 +83,29 @@ export const uploadPdf = async (file: File) => {
 
 export const deletePdf = async (url: string) => {
     return libraryApi.delete("/delete-pdf", {
-      params: { url }
+        params: { url }
     });
-  };
+};
+
+
+export const uploadAuditPdf = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await taxApi.post(
+        "/audit/upload",
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        }
+    );
+
+    const responseData = response.data;
+
+    console.log("Audit PDF upload response:", responseData);
+    
+
+    return responseData;
+};

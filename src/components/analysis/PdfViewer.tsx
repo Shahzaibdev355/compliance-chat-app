@@ -25,10 +25,11 @@ import {
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-import AnnualReport from "../../assets/pdf/AnnualReport.pdf";
+// import AnnualReport from "../../assets/pdf/AnnualReport.pdf";
+// const pdfUrl = localStorage.getItem("uploadedPdfUrl");
 
-import * as pdfjsLib from "pdfjs-dist";
-import test from "node:test";
+// import * as pdfjsLib from "pdfjs-dist";
+// import test from "node:test";
 // import "pdfjs-dist/build/pdf.worker.entry";
 
 // Configure PDF.js worker
@@ -45,6 +46,9 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   selectedFlagId,
   onMarkerClick,
 }) => {
+
+  const pdfUrl = localStorage.getItem("uploadedPdfUrl") || "";
+
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
@@ -121,39 +125,89 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   };
 
-  const currentPageFlags = data.flags.filter(
-    (flag) => flag.page === pageNumber
-  );
+  // const currentPageFlags = data.flags.filter(
+  //   (flag) => flag.page === pageNumber
+  // );
+
+
+  const generatedFlags =
+    data.flags.map((item: any, index: number) => ({
+
+      id: `flag-${index}`,
+      page: 1,
+      title: item.summary,
+      color:
+        item.flag === "Red"
+          ? "red"
+          : item.flag === "Yellow"
+            ? "yellow"
+            : "green",
+
+      x: 80 + index * 20,
+      y: 120 + index * 35
+    }));
+
 
   // put this inside your PdfViewer component (assumes react-pdf is already set up)
-  const dummyHighlights = [
-    { text: "in preparing the financial statements", color: "red" },
-    {
-      text: "the audit or otherwise appears to be materially misstated.",
-      color: "yellow",
-    },
-    {
-      text: "the requirements of Companies Act, 2017 (XIX of 2017)",
-      color: "green",
-    },
-    {
-      text: "misstatement, whether due to fraud or error, and to issue an auditors’ report that includes our opinion.",
-      color: "red",
-    },
+  // const dummyHighlights = [
+  //   { text: "in preparing the financial statements", color: "red" },
+  //   {
+  //     text: "the audit or otherwise appears to be materially misstated.",
+  //     color: "yellow",
+  //   },
+  //   {
+  //     text: "the requirements of Companies Act, 2017 (XIX of 2017)",
+  //     color: "green",
+  //   },
+  //   {
+  //     text: "misstatement, whether due to fraud or error, and to issue an auditors’ report that includes our opinion.",
+  //     color: "red",
+  //   },
 
-    {
-      text: "Conclude on the appropriateness of management’s use of the going concern basis of accounting",
-      color: "yellow",
-    },
-    {
-      text: "Evaluate the overall presentation, structure and content of the financial statements",
-      color: "green",
-    },
-    {
-      text: "no zakat deductible at source under the Zakat and Ushr Ordinance, 1980 (XVIII of 1980)",
-      color: "red",
-    },
-  ];
+  //   {
+  //     text: "Conclude on the appropriateness of management’s use of the going concern basis of accounting",
+  //     color: "yellow",
+  //   },
+  //   {
+  //     text: "Evaluate the overall presentation, structure and content of the financial statements",
+  //     color: "green",
+  //   },
+  //   {
+  //     text: "no zakat deductible at source under the Zakat and Ushr Ordinance, 1980 (XVIII of 1980)",
+  //     color: "red",
+  //   },
+  // ];
+
+
+  // const dummyHighlights = data.flags.map((item: any) => ({
+  //   // text: item.text,
+  //   // ✅ New — take first meaningful phrase (40-60 chars), more likely to be in one span
+  //   text: item.text.trim().slice(0, 50).split('\n')[0].trim(),
+  //   color:
+  //     item.flag === "Red"
+  //       ? "red"
+  //       : item.flag === "Yellow"
+  //         ? "yellow"
+  //         : "green"
+  // }));
+
+
+  // Build highlights from each line of each flag
+  const dummyHighlights = data.flags.flatMap((item: any) => {
+    const color =
+      item.flag === "Red" ? "red" :
+        item.flag === "Yellow" ? "yellow" : "green";
+
+    return item.text
+      .split('\n')                          // split by newline
+      .map((line: string) => line.trim())   // trim whitespace
+      .filter((line: string) => line.length > 20) // skip tiny fragments
+      .map((line: string) => ({
+        text: line,         // first 60 chars of each line
+        color
+      }));
+  });
+
 
   function highlightText() {
     const bgFor = (color: string) => {
@@ -197,27 +251,6 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     });
   }
 
-  // ✅ Reapply highlights after every PDF re-render (zoom, pan, resize)
-  // useEffect(() => {
-  //   const observer = new MutationObserver(() => {
-  //     // Whenever React-PDF re-renders the text layer, rerun highlight logic
-  //     highlightText();
-  //   });
-
-  //   // Watch all text layers for mutation (React-PDF replaces them on zoom)
-  //   const container = document.querySelector(".react-pdf__Document");
-  //   if (container) {
-  //     observer.observe(container, {
-  //       childList: true,
-  //       subtree: true,
-  //     });
-  //   }
-
-  //   // Initial highlight on mount
-  //   highlightText();
-
-  //   return () => observer.disconnect();
-  // }, [pageNumber, scale]);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -236,12 +269,12 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     return () => observer.disconnect();
   }, [pageNumber, scale, isFullscreen]);
 
-  if (isFullscreen) {
-    setTimeout(highlightText, 800);
-  } else {
-    highlightText();
-  }
-  
+  // if (isFullscreen) {
+  //   setTimeout(highlightText, 800);
+  // } else {
+  //   highlightText();
+  // }
+
 
   return (
     <div className="h-full flex flex-col bg-muted/20">
@@ -370,8 +403,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
             ref={containerRef}
           >
             <div className="relative inline-block" style={{ border: "" }}>
-              <Document
-                // file={data.annotatedPdfUrl}
+              {/* <Document
                 file={AnnualReport}
                 onLoadSuccess={onDocumentLoadSuccess}
                 loading={
@@ -384,7 +416,19 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                     <div className="text-destructive">Failed to load PDF</div>
                   </div>
                 }
+              > */}
+
+              <Document
+                file={pdfUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading={<div className="flex items-center justify-center h-64">
+                  <div className="text-muted-foreground">Loading PDF...</div>
+                </div>}
+                error={<div className="flex items-center justify-center h-64">
+                  <div className="text-destructive">Failed to load PDF</div>
+                </div>}
               >
+
                 <Page
                   pageNumber={pageNumber}
                   scale={scale}
@@ -393,62 +437,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                 />
               </Document>
 
-              {/* Sentence Highlights */}
-              {/* {highlights
-                .filter((h) => h.page === pageNumber)
-                .map((highlight) => (
-                  <div
-                    key={highlight.id}
-                    className={`absolute opacity-50 z-10 rounded-sm ${
-                      highlight.color === "red"
-                        ? "bg-red-500"
-                        : highlight.color === "yellow"
-                        ? "bg-yellow-400"
-                        : "bg-green-400"
-                    }`}
-                    style={{
-                      left: highlight.x * scale,
-                      top: highlight.y * scale,
-                      width: highlight.width * scale,
-                      height: highlight.height * scale,
-                    }}
-                  />
-                ))} */}
 
-              {/* {sentenceHighlights.filter(h => h.page === pageNumber).map((highlight) => (
-                <div
-                  key={highlight.id}
-                  className={`absolute border-2 opacity-60 z-5 ${
-                    highlight.color === 'red' ? 'border-red-500' :
-                    highlight.color === 'yellow' ? 'border-yellow-500' :
-                    'border-green-500'
-                  }`}
-                  style={{
-                    left: highlight.x * scale,
-                    top: highlight.y * scale,
-                    width: highlight.width * scale,
-                    height: highlight.height * scale,
-                  }}
-                />
-              ))} */}
-
-              {/* Annotation Markers */}
-              {/* {currentPageFlags.map((flag) => (
-                <button
-                  key={flag.id}
-                  onClick={() => handleMarkerClick(flag)}
-                  className={`absolute w-6 h-6 rounded-full border-2 cursor-pointer z-10 animate-pulse
-                    ${getMarkerColor(flag.color)}
-                    ${selectedFlagId === flag.id ? 'ring-2 ring-primary ring-offset-2' : ''}
-                    hover:scale-110 transition-transform duration-200`}
-                  style={{
-                    left: flag.x * scale,
-                    top: flag.y * scale,
-                  }}
-                  title={flag.title}
-                  aria-label={`Flag: ${flag.title} on page ${flag.page}`}
-                />
-              ))} */}
             </div>
           </div>
         </ScrollArea>
@@ -542,23 +531,29 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                   />
                 </Document> */}
 
-<Document
-  file={AnnualReport}
-  onLoadSuccess={onDocumentLoadSuccess}
-  loading={<div className="flex items-center justify-center h-64"><div className="text-muted-foreground">Loading PDF...</div></div>}
-  error={<div className="flex items-center justify-center h-64"><div className="text-destructive">Failed to load PDF</div></div>}
->
-  {Array.from({ length: numPages || 0 }).map((_, index) => (
-    <Page
-      key={`page_${index + 1}`}
-      pageNumber={index + 1}
-      scale={scale}
-      renderTextLayer
-      renderAnnotationLayer
-      className="shadow-lg border border-border/20 mb-4"
-    />
-  ))}
-</Document>
+                {/* <Document
+                  file={AnnualReport}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  loading={<div className="flex items-center justify-center h-64"><div className="text-muted-foreground">Loading PDF...</div></div>}
+                  error={<div className="flex items-center justify-center h-64"><div className="text-destructive">Failed to load PDF</div></div>}
+                > */}
+                <Document
+                  file={pdfUrl}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  loading={<div className="flex items-center justify-center h-64"><div className="text-muted-foreground">Loading PDF...</div></div>}
+                  error={<div className="flex items-center justify-center h-64"><div className="text-destructive">Failed to load PDF</div></div>}
+                >
+                  {Array.from({ length: numPages || 0 }).map((_, index) => (
+                    <Page
+                      key={`page_${index + 1}`}
+                      pageNumber={index + 1}
+                      scale={scale}
+                      renderTextLayer
+                      renderAnnotationLayer
+                      className="shadow-lg border border-border/20 mb-4"
+                    />
+                  ))}
+                </Document>
 
 
                 {/* Fullscreen Sentence Highlights */}

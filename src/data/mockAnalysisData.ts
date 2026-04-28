@@ -1,6 +1,7 @@
 export interface Flag {
   id: string;
   title: string;
+  reason: string;
   color: 'red' | 'yellow' | 'green' | 'blue';
   severity: number;
   confidence: number;

@@ -28,21 +28,46 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('flags');
   const [newMessage, setNewMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState<Array<{id: string, type: 'user' | 'assistant', content: string}>>([]);
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string, type: 'user' | 'assistant', content: string }>>([]);
   const { toast } = useToast();
 
   // Calculate counts for pie chart
-  const colorCounts = data.flags.reduce((acc, flag) => {
-    acc[flag.color] = (acc[flag.color] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // const colorCounts = data.flags.reduce((acc, flag) => {
+  //   acc[flag.color] = (acc[flag.color] || 0) + 1;
+  //   return acc;
+  // }, {} as Record<string, number>);
 
-  const pieData = Object.entries(colorCounts).map(([color, count]) => ({
-    name: color.charAt(0).toUpperCase() + color.slice(1),
-    value: count,
-    color: color,
-    percentage: ((count / data.flags.length) * 100).toFixed(1),
-  }));
+  // const pieData = Object.entries(colorCounts).map(([color, count]) => ({
+  //   name: color.charAt(0).toUpperCase() + color.slice(1),
+  //   value: count,
+  //   color: color,
+  //   percentage: ((count / data.flags.length) * 100).toFixed(1),
+  // }));
+
+
+  // ✅ Replace with — use stats directly
+  const total = data.stats?.total_chunks || 1;
+
+  const pieData = [
+    {
+      name: 'Red',
+      value: data.stats?.red || 0,
+      color: 'red',
+      percentage: (((data.stats?.red || 0) / total) * 100).toFixed(1),
+    },
+    {
+      name: 'Yellow',
+      value: data.stats?.yellow || 0,
+      color: 'yellow',
+      percentage: (((data.stats?.yellow || 0) / total) * 100).toFixed(1),
+    },
+    {
+      name: 'Green',
+      value: data.stats?.green || 0,
+      color: 'green',
+      percentage: (((data.stats?.green || 0) / total) * 100).toFixed(1),
+    },
+  ].filter(item => item.value > 0); // hide zero segments
 
   const COLORS = {
     red: '#ef4444',
@@ -94,9 +119,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
         type: 'user' as const,
         content: newMessage
       };
-      
+
       setChatMessages(prev => [...prev, userMessage]);
-      
+
       setTimeout(() => {
         const aiResponse = {
           id: (Date.now() + 1).toString(),
@@ -105,7 +130,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
         };
         setChatMessages(prev => [...prev, aiResponse]);
       }, 1000);
-      
+
       setNewMessage('');
       toast({
         title: "Query Sent",
@@ -164,7 +189,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             <p className="text-xs md:text-sm text-muted-foreground">Processed on {data.timestamp}</p>
           </div>
         </div>
-        
+
         {data.additionalQuery && (
           <div className="text-xs md:text-sm text-muted-foreground">
             Additional Query: {data.additionalQuery}
@@ -217,7 +242,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
             <TabsContent value="recommendations" className="h-full m-0">
               <Recommendations
-                recommendations={data.recommendations}
+                flags={data.flags}
               />
             </TabsContent>
 
@@ -238,21 +263,21 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         className="cursor-pointer"
                       >
                         {pieData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
+                          <Cell
+                            key={`cell-${index}`}
                             fill={COLORS[entry.color as keyof typeof COLORS]}
                             stroke={filteredColor === entry.color ? "#000" : "none"}
                             strokeWidth={filteredColor === entry.color ? 2 : 0}
                           />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value, name, props) => [
                           `${value} (${props.payload.percentage}%)`,
                           props.payload.name
                         ]}
                       />
-                      <Legend 
+                      <Legend
                         formatter={(value, entry: any) => (
                           <span className={`text-xs ${filteredColor === entry.payload?.color ? 'font-bold' : ''}`}>
                             {entry.payload?.name}: {entry.payload?.value} ({entry.payload?.percentage}%)
@@ -276,7 +301,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         {data.additionalQuery}
                       </p>
                     </div>
-                    
+
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-medium text-foreground">Response:</h4>
@@ -307,7 +332,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     </div>
                   </div>
                 )}
-                
+
                 {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto space-y-3">
                   {!data.additionalQuery && chatMessages.length === 0 && (
@@ -318,11 +343,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                   )}
                   {chatMessages.map((message) => (
                     <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-3 rounded-lg text-sm ${
-                        message.type === 'user' 
-                          ? 'bg-primary text-primary-foreground' 
+                      <div className={`max-w-[80%] p-3 rounded-lg text-sm ${message.type === 'user'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-foreground'
-                      }`}>
+                        }`}>
                         <p>{message.content}</p>
                         {message.type === 'assistant' && (
                           <div className="flex gap-2 mt-2">
@@ -350,7 +374,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Chat Input */}
                 <div className="flex gap-2 pt-3 border-t border-border/20">
                   <Input
@@ -360,7 +384,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     className="flex-1"
                   />
-                  <Button 
+                  <Button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim()}
                     size="sm"

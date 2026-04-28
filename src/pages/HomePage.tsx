@@ -16,12 +16,6 @@ import type { Message, Reference, PDFDoc } from '@/types/chat';
 
 
 
-
-
-
-
-
-
 interface HomePageProps {
   onAccessAgent: () => void;
   onAccessLibrary: () => void;
@@ -29,6 +23,8 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onAccessAgent, onAccessLibrary, onLogout }) => {
+
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMode, setCurrentMode] = useState<'gpt' | 'agent' | 'chat'>('gpt');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

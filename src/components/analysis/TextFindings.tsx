@@ -57,26 +57,26 @@ const TextFindings: React.FC<TextFindingsProps> = ({
 
   const getColorClass = (color: string) => {
     switch (color) {
-      case 'red': return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950';
-      case 'yellow': return 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950';
-      case 'green': return 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950';
-      case 'blue': return 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950';
+      case 'Red': return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950';
+      case 'Yellow': return 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950';
+      case 'Green': return 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950';
+      case 'Blue': return 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950';
       default: return 'border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950';
     }
   };
 
   const getColorDot = (color: string) => {
     switch (color) {
-      case 'red': return 'bg-red-500';
-      case 'yellow': return 'bg-yellow-500';
-      case 'green': return 'bg-green-500';
-      case 'blue': return 'bg-blue-500';
+      case 'Red': return 'bg-red-500';
+      case 'Yellow': return 'bg-yellow-500';
+      case 'Green': return 'bg-green-500';
+      case 'Blue': return 'bg-blue-500';
       default: return 'bg-gray-500';
     }
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full" style={{border: ''}}>
       <ScrollArea className="h-full p-4">
         <div className="space-y-4">
           <div className="text-sm text-muted-foreground mb-4">
@@ -89,16 +89,16 @@ const TextFindings: React.FC<TextFindingsProps> = ({
             return (
               <div
                 key={flag.id}
-                className={`border rounded-lg p-4 transition-all duration-200 hover:shadow-md ${getColorClass(flag.color)}`}
+                className={`border rounded-lg p-4 transition-all duration-200 hover:shadow-md ${getColorClass(flag.flag)}`}
               >
                 <div className="flex items-start gap-3 mb-3">
-                  <div className={`w-3 h-3 rounded-full mt-1 ${getColorDot(flag.color)}`} />
+                  <div className={`w-3 h-3 rounded-full mt-1 ${getColorDot(flag.flag)}`} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-medium text-sm">{flag.title}</h4>
-                      <Badge variant="outline" className="text-xs">
+                      <h4 className="font-medium text-sm">{flag.reason}</h4>
+                      {/* <Badge variant="outline" className="text-xs">
                         Page {flag.page}, Line {flag.lineNumber}
-                      </Badge>
+                      </Badge> */}
                     </div>
                     
                     <div 
@@ -107,7 +107,7 @@ const TextFindings: React.FC<TextFindingsProps> = ({
                       }`}
                     >
                       <p className="text-sm font-mono leading-relaxed">
-                        "{flag.textSnippet}"
+                        "{flag.summary}"
                       </p>
                     </div>
 
@@ -143,7 +143,7 @@ const TextFindings: React.FC<TextFindingsProps> = ({
                         Copy
                       </Button>
                       
-                      <Button
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onFlagClick(flag.id)}
@@ -151,7 +151,7 @@ const TextFindings: React.FC<TextFindingsProps> = ({
                       >
                         <MapPin className="h-3 w-3" />
                         Locate in PDF
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </div>
