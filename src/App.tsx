@@ -13,6 +13,11 @@ import AnalysisResultPage from "./pages/AnalysisResultPage";
 import LibraryPage from "./pages/LibraryPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 
+import { ClerkProvider, useAuth, useClerk } from '@clerk/clerk-react';
+import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
 import { pdfjs } from 'react-pdf';
 
 // ✅ Vite-compatible: use new URL() to resolve path
@@ -25,28 +30,38 @@ const queryClient = new QueryClient();
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem('taxtro-auth-token');
+  const { isSignedIn, isLoaded } = useAuth();
   const location = useLocation();
-  
-  if (!token) {
+
+  if (!isLoaded) return null; // wait for Clerk to load
+
+  if (!isSignedIn) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   return <>{children}</>;
 };
 
-const AppRoutes = ({ onLogout, onLogin }: { onLogout: () => void; onLogin: () => void }) => {
+
+
+
+
+const AppRoutes = () => {
   const navigate = useNavigate();
+  const { signOut } = useClerk();
 
   return (
     <Routes>
-      <Route path="/login" element={<AuthPage onLogin={onLogin} />} />
+      <Route path="/login" element={<AuthPage />} />
+
+      <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
+
       <Route path="/" element={
         <ProtectedRoute>
-          <HomePage 
-            onAccessAgent={() => navigate('/agent')} 
+          <HomePage
+            onAccessAgent={() => navigate('/agent')}
             onAccessLibrary={() => navigate('/library')}
-            onLogout={onLogout} 
+            onLogout={() => signOut(() => navigate('/login'))}
           />
         </ProtectedRoute>
       } />
@@ -96,19 +111,21 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ChatHistoryProvider>
-          <BrowserRouter>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <AppRoutes onLogout={handleLogout} onLogin={handleLogin} />
-            </TooltipProvider>
-          </BrowserRouter>
-        </ChatHistoryProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <ChatHistoryProvider>
+            <BrowserRouter>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <AppRoutes />  {/* remove onLogout/onLogin props */}
+              </TooltipProvider>
+            </BrowserRouter>
+          </ChatHistoryProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 };
 

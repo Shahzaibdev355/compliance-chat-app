@@ -21,6 +21,9 @@ import {
   History
 } from 'lucide-react';
 
+
+import { useClerk, useUser } from '@clerk/clerk-react';
+
 interface SidebarProps {
   onNewChat: () => void;
   onAccessGPT: () => void;
@@ -54,14 +57,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     setShowSearchDialog(true);
   };
 
+
+  const { signOut } = useClerk();
+  const { user } = useUser();
+
   return (
     <div className={`${collapsed ? 'w-16' : 'w-64'} bg-sidebar-background border-r border-border flex flex-col h-full transition-all duration-300 ease-in-out`}>
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 overflow-hidden">
-          <img 
-            src={taxtroIcon} 
-            alt="TaxTro" 
+          <img
+            src={taxtroIcon}
+            alt="TaxTro"
             className="h-10 w-10 transition-all duration-300 ease-in-out"
           />
           {!collapsed && (
@@ -224,19 +231,28 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!collapsed && <span className="animate-fade-in transition-opacity duration-300 ease-in-out delay-100">Profile</span>}
         </Button>
 
-        {showProfile && !collapsed && (
+        {/* {showProfile && !collapsed && (
           <div className="ml-7 text-sm text-muted-foreground space-y-1 animate-fade-in transition-all duration-300 ease-in-out group">
             <p>John Doe</p>
             <p>john@example.com</p>
             <p className="text-xs">Professional Plan</p>
           </div>
+        )} */}
+
+        {showProfile && !collapsed && (
+          <div className="ml-7 text-sm text-muted-foreground space-y-1 animate-fade-in transition-all duration-300 ease-in-out group">
+            <p>{user?.fullName || user?.firstName || 'User'}</p>
+            <p>{user?.primaryEmailAddress?.emailAddress || ''}</p>
+          </div>
         )}
+
 
         {/* Logout */}
         <Button
           variant="ghost"
           className={`w-full ${collapsed ? 'justify-center px-2' : 'justify-start'} text-destructive hover:text-destructive transition-all duration-300 ease-in-out`}
-          onClick={onLogout}
+          // onClick={onLogout}
+          onClick={() => signOut(() => navigate('/login'))}
           title={collapsed ? "Logout" : undefined}
         >
           <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-3'} transition-all duration-300 ease-in-out`} />
@@ -245,9 +261,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Search Chat Dialog */}
-      <SearchChatDialog 
-        open={showSearchDialog} 
-        onOpenChange={setShowSearchDialog} 
+      <SearchChatDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
       />
     </div>
   );
