@@ -29,7 +29,23 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('flags');
   const [newMessage, setNewMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState<Array<{ id: string, type: 'user' | 'assistant', content: string }>>([]);
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string, type: 'user' | 'assistant', content: string }>>(() => {
+    const initial: Array<{ id: string, type: 'user' | 'assistant', content: string }> = [];
+    if (data.additionalQuery) {
+      initial.push({ id: 'initial-q', type: 'user', content: data.additionalQuery });
+      if (data.initialAnswer) {
+        initial.push({ id: 'initial-a', type: 'assistant', content: data.initialAnswer });
+      }
+    }
+    return initial;
+  });
+  const [isLoadingResponse, setIsLoadingResponse] = useState(false);
+  const chatScrollRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages, isLoadingResponse]);
   const { toast } = useToast();
 
   // Calculate counts for pie chart
