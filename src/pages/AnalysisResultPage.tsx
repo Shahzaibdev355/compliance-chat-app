@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import PdfViewer from '@/components/analysis/PdfViewer';
 import ResultsPanel from '@/components/analysis/ResultsPanel';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { askAuditQuestion } from "@/api/taxApi";
 import { mockAnalysisData } from '@/data/mockAnalysisData';
 
 
@@ -32,12 +33,65 @@ const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
   };
 
 
-  useEffect(() => {
-    const data = localStorage.getItem("auditResults");
+  // useEffect(() => {
+  //   const data = localStorage.getItem("auditResults");
 
-    if (data) {
-      setAnalysisData(JSON.parse(data));
-    }
+  //   const savedQuery = localStorage.getItem("additionalQuery");
+
+  //   if (data) {
+  //     const parsed = JSON.parse(data);
+  //     parsed.additionalQuery = savedQuery || "";
+  //     setAnalysisData(parsed);
+  //   }
+
+  //   const timer = setTimeout(() => {
+  //     setShowLoading(false);
+  //   }, 5000);
+
+  //   return () => clearTimeout(timer);
+
+  // }, []);
+
+
+  useEffect(() => {
+
+    const loadAnalysis = async () => {
+
+      const data = localStorage.getItem("auditResults");
+      const sessionId = localStorage.getItem("session_id");
+      const savedQuery = localStorage.getItem("additionalQuery");
+
+      if (!data) return;
+
+      const parsed = JSON.parse(data);
+
+      parsed.additionalQuery = savedQuery || "";
+
+      // Auto ask AI if user entered query during upload
+      if (savedQuery?.trim() && sessionId) {
+
+        try {
+
+          const response = await askAuditQuestion(
+            sessionId,
+            savedQuery
+          );
+
+          parsed.initialAnswer = response?.answer || "No answer was returned.";
+
+        } catch (err) {
+          console.error("Initial query failed", err);
+
+          parsed.initialAnswer = "Failed to retrieve answer from the server.";
+
+        }
+
+      }
+
+      setAnalysisData(parsed);
+    };
+
+    loadAnalysis();
 
     const timer = setTimeout(() => {
       setShowLoading(false);
@@ -46,6 +100,7 @@ const AnalysisResultPage: React.FC<AnalysisResultPageProps> = ({ onBack }) => {
     return () => clearTimeout(timer);
 
   }, []);
+
 
   return (
     <div className="h-screen flex flex-col bg-background">

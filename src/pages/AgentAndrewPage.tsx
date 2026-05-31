@@ -70,30 +70,6 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
     }
   };
 
-  // const handleProceed = async () => {
-  //   if (!uploadedFile) return;
-
-  //   setIsProcessing(true);
-  //   setProgress(0);
-
-  //   // Simulate processing
-  //   const interval = setInterval(() => {
-  //     setProgress(prev => {
-  //       if (prev >= 100) {
-  //         clearInterval(interval);
-  //         setIsProcessing(false);
-  //         // Store uploaded file data for analysis result page
-  //         localStorage.setItem('uploadedPdf', uploadedFile.name);
-  //         localStorage.setItem('additionalQuery', query);
-  //         // Navigate to analysis result page
-  //         navigate('/analysis-result');
-  //         return 100;
-  //       }
-  //       return prev + 10;
-  //     });
-  //   }, 200);
-  // };
-
 
   const handleProceed = async () => {
     if (!uploadedFile) return;
@@ -122,6 +98,11 @@ const AgentAndrewPage: React.FC<AgentAndrewPageProps> = ({ onBack }) => {
       localStorage.setItem(
         "auditResults",
         JSON.stringify(result)
+      );
+
+      localStorage.setItem(
+        "additionalQuery",
+        query
       );
 
       localStorage.setItem(

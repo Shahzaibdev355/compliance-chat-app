@@ -21,6 +21,7 @@ export interface AnalysisData {
   additionalQuery?: string;
   annotatedPdfUrl: string;
   originalPdfUrl: string;
+  initialAnswer?: string;
   flags: Flag[];
   recommendations: {
     [key: string]: {

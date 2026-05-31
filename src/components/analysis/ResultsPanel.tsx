@@ -10,6 +10,7 @@ import TextFindings from './TextFindings';
 import Recommendations from './Recommendations';
 import { AnalysisData } from '@/data/mockAnalysisData';
 import { useToast } from '@/hooks/use-toast';
+import { askAuditQuestion } from "@/api/taxApi";
 
 interface ResultsPanelProps {
   data: AnalysisData;
@@ -112,44 +113,68 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     console.log('Sharing analysis');
   };
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const userMessage = {
-        id: Date.now().toString(),
-        type: 'user' as const,
-        content: newMessage
+  const handleSendMessage = async () => {
+
+    if (!newMessage.trim()) return;
+
+    const sessionId = localStorage.getItem("session_id");
+
+    if (!sessionId) {
+      toast({
+        title: "Session Missing",
+        description: "Please upload a PDF first.",
+      });
+      return;
+    }
+
+    const userMessage = {
+      id: Date.now().toString(),
+      type: "user" as const,
+      content: newMessage,
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+
+    const question = newMessage;
+
+    setNewMessage("");
+
+    try {
+
+      const response = await askAuditQuestion(
+        sessionId,
+        question
+      );
+
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        type: "assistant" as const,
+        content: response.answer,
       };
 
-      setChatMessages(prev => [...prev, userMessage]);
+      setChatMessages(prev => [...prev, aiMessage]);
 
-      setTimeout(() => {
-        const aiResponse = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant' as const,
-          content: getDummyResponse(newMessage)
-        };
-        setChatMessages(prev => [...prev, aiResponse]);
-      }, 1000);
+    } catch (error) {
 
-      setNewMessage('');
+      console.error(error);
+
       toast({
-        title: "Query Sent",
-        description: "Processing your question...",
-        duration: 2000,
+        title: "Error",
+        description: "Failed to get response",
       });
     }
   };
 
-  const getDummyResponse = (query: string): string => {
-    const responses = [
-      "Based on the document analysis, I found that this relates to compliance requirements. The relevant section shows that proper documentation is required for this matter.",
-      "According to the tax regulations, this issue requires immediate attention. I recommend reviewing the specific clauses mentioned in pages 3-5 of your document.",
-      "The analysis indicates that this falls under the yellow flag category. You should consult with a tax professional to ensure full compliance.",
-      "This query relates to the compliance findings in your document. The relevant provisions suggest that corrective action may be needed within 30 days.",
-      "Based on the uploaded document, this issue appears in multiple sections. I recommend prioritizing the red-flagged items first before addressing this concern."
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+  // const getDummyResponse = (query: string): string => {
+  //   const responses = [
+  //     "Based on the document analysis, I found that this relates to compliance requirements. The relevant section shows that proper documentation is required for this matter.",
+  //     "According to the tax regulations, this issue requires immediate attention. I recommend reviewing the specific clauses mentioned in pages 3-5 of your document.",
+  //     "The analysis indicates that this falls under the yellow flag category. You should consult with a tax professional to ensure full compliance.",
+  //     "This query relates to the compliance findings in your document. The relevant provisions suggest that corrective action may be needed within 30 days.",
+  //     "Based on the uploaded document, this issue appears in multiple sections. I recommend prioritizing the red-flagged items first before addressing this concern."
+  //   ];
+  //   return responses[Math.floor(Math.random() * responses.length)];
+  // };
 
   const handleSpeakText = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -195,6 +220,21 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             Additional Query: {data.additionalQuery}
           </div>
         )}
+
+        {/* {data.additionalQuery && (
+          <div className="space-y-2 text-sm">
+            <div className="text-xs md:text-sm text-muted-foreground">
+              <strong>Question:</strong>
+              <p>{data.additionalQuery}</p>
+            </div>
+
+            <div>
+              <strong>Answer:</strong>
+              <p>{data.initialAnswer}</p>
+            </div>
+          </div>
+        )} */}
+
       </div>
 
       {/* Tabs */}
@@ -309,7 +349,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleSpeakText("Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance.")}
+                            onClick={() => handleSpeakText(data.initialAnswer)}
                             className="h-7 px-2"
                             title="Play Audio"
                           >
@@ -318,7 +358,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleCopyText("Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance.")}
+                            onClick={() => handleCopyText(data.initialAnswer)}
                             className="h-7 px-2"
                             title="Copy"
                           >
@@ -327,7 +367,8 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                        Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance.
+                        {data.initialAnswer}
+                        {/* Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance. */}
                       </p>
                     </div>
                   </div>
@@ -344,8 +385,8 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                   {chatMessages.map((message) => (
                     <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[80%] p-3 rounded-lg text-sm ${message.type === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground'
                         }`}>
                         <p>{message.content}</p>
                         {message.type === 'assistant' && (

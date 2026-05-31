@@ -10,6 +10,15 @@ export const taxApi = axios.create({
 
 
 
+export const LexaApi = axios.create({
+    baseURL: "http://127.0.0.1:5000",
+    withCredentials: true, // ✅ CORRECT PLACE
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
+
 
 export const libraryApi = axios.create({
     baseURL: "http://127.0.0.1:8000",
@@ -71,15 +80,6 @@ export const uploadPdf = async (file: File) => {
 };
 
 
-// export const deletePdf = async (url:string)=>{
-//     return libraryApi.delete(
-//       "/delete-pdf",
-//       {
-//        data:{ url }
-//       }
-//     );
-//    }
-
 
 export const deletePdf = async (url: string) => {
     return libraryApi.delete("/delete-pdf", {
@@ -92,7 +92,7 @@ export const uploadAuditPdf = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await taxApi.post(
+    const response = await LexaApi.post(
         "/audit/upload",
         formData,
         {
@@ -105,7 +105,25 @@ export const uploadAuditPdf = async (file: File) => {
     const responseData = response.data;
 
     console.log("Audit PDF upload response:", responseData);
-    
+
 
     return responseData;
+};
+
+
+// additional query asked
+
+export const askAuditQuestion = async (
+    sessionId: string,
+    question: string
+) => {
+
+    const response = await LexaApi.post(
+        `/audit/chat/${sessionId}`,
+        {
+            question
+        }
+    );
+
+    return response.data;
 };
