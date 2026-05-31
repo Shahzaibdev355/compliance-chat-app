@@ -113,7 +113,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
       const newFile = {
         id: Date.now().toString(),
         name: pendingFile.file.name,
-        type: "pdf",
+        type: "pdf" as const,
         size: formatFileSize(
           pendingFile.file.size
         ),
