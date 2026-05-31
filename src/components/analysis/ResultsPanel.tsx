@@ -350,52 +350,13 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             </TabsContent>
 
             <TabsContent value="additional-query" className="h-full m-0">
-              <div className="p-4 space-y-4 h-full flex flex-col">
-                {/* Initial Query and Response - Show if there's an initial query */}
-                {data.additionalQuery && (
-                  <div className="space-y-4 pb-4 border-b border-border/20">
-                    <div>
-                      <h4 className="text-sm font-medium text-foreground mb-2">Your Question:</h4>
-                      <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                        {data.additionalQuery}
-                      </p>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-medium text-foreground">Response:</h4>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSpeakText(data.initialAnswer)}
-                            className="h-7 px-2"
-                            title="Play Audio"
-                          >
-                            🔊
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopyText(data.initialAnswer)}
-                            className="h-7 px-2"
-                            title="Copy"
-                          >
-                            📋
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                        {data.initialAnswer}
-                        {/* Based on the analysis of your uploaded document, I found several key compliance points related to your query. The document shows proper tax calculation methods and adherence to current Income Tax regulations. However, there are a few areas that may need attention for complete compliance. */}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
+              <div className="p-4 h-full flex flex-col min-h-0">
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto space-y-3">
-                  {!data.additionalQuery && chatMessages.length === 0 && (
+                <div
+                  ref={chatScrollRef}
+                  className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1"
+                >
+                  {chatMessages.length === 0 && !isLoadingResponse && (
                     <div className="text-center text-muted-foreground py-8">
                       <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
                       <p>Start a conversation about your analysis</p>
@@ -407,7 +368,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted text-foreground'
                         }`}>
-                        <p>{message.content}</p>
+                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
                         {message.type === 'assistant' && (
                           <div className="flex gap-2 mt-2">
                             <Button
@@ -433,25 +394,36 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       </div>
                     </div>
                   ))}
+                  {isLoadingResponse && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[80%] p-3 rounded-lg text-sm bg-muted text-foreground">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block h-2 w-2 rounded-full bg-foreground/60 animate-pulse" />
+                          <span className="text-muted-foreground italic">Preparing response...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Chat Input */}
-                <div className="flex gap-2 pt-3 border-t border-border/20">
+                {/* Chat Input - sticky to bottom of tab panel */}
+                <div className="flex gap-2 pt-3 mt-3 border-t border-border/20 bg-background sticky bottom-0">
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Ask a follow-up question..."
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    onKeyPress={(e) => e.key === 'Enter' && !isLoadingResponse && handleSendMessage()}
+                    disabled={isLoadingResponse}
                     className="flex-1"
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
+                    disabled={!newMessage.trim() || isLoadingResponse}
                     size="sm"
                   >
                     Send
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" disabled={isLoadingResponse}>
                     🎤
                   </Button>
                 </div>
