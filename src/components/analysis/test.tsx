@@ -25,7 +25,7 @@ import {
 import AnnualReport from "../../assets/pdf/AnnualReport.pdf";
 
 import * as pdfjsLib from "pdfjs-dist";
-import test from "node:test";
+
 // import "pdfjs-dist/build/pdf.worker.entry";
 
 // Configure PDF.js worker
