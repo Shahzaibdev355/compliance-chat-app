@@ -1,7 +1,8 @@
 export interface Flag {
   id: string;
   title: string;
-  reason: string;
+  reason?: string;
+  flag?: string;
   color: 'red' | 'yellow' | 'green' | 'blue';
   severity: number;
   confidence: number;
@@ -15,6 +16,13 @@ export interface Flag {
   resolved: boolean;
 }
 
+export interface AnalysisStats {
+  total_chunks?: number;
+  red?: number;
+  yellow?: number;
+  green?: number;
+}
+
 export interface AnalysisData {
   documentTitle: string;
   timestamp: string;
@@ -22,6 +30,7 @@ export interface AnalysisData {
   annotatedPdfUrl: string;
   originalPdfUrl: string;
   initialAnswer?: string;
+  stats?: AnalysisStats;
   flags: Flag[];
   recommendations: {
     [key: string]: {
