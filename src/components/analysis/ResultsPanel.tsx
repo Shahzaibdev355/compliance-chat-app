@@ -154,6 +154,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     const question = newMessage;
 
     setNewMessage("");
+    setIsLoadingResponse(true);
 
     try {
 
@@ -178,6 +179,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
         title: "Error",
         description: "Failed to get response",
       });
+    } finally {
+      setIsLoadingResponse(false);
+    }
     }
   };
 
