@@ -182,7 +182,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     } finally {
       setIsLoadingResponse(false);
     }
-    }
   };
 
   // const getDummyResponse = (query: string): string => {
