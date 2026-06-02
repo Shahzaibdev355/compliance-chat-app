@@ -1,8 +1,10 @@
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const taxApi = axios.create({
-    baseURL: "http://127.0.0.1:8000",
-    withCredentials: true, 
+    baseURL: BASE_URL,
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
@@ -12,7 +14,7 @@ export const taxApi = axios.create({
 
 
 export const libraryApi = axios.create({
-    baseURL: "http://127.0.0.1:8000",
+    baseURL: BASE_URL,
     headers: {
         "Content-Type": "multipart/form-data",
     },
@@ -21,8 +23,8 @@ export const libraryApi = axios.create({
 
 
 export const LexaApi = axios.create({
-    baseURL: "http://127.0.0.1:8000",
-    withCredentials: true, 
+    baseURL: BASE_URL,
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
