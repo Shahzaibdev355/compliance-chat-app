@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import {
   ZoomIn,
@@ -33,7 +33,15 @@ import "react-pdf/dist/Page/TextLayer.css";
 // import "pdfjs-dist/build/pdf.worker.entry";
 
 // Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+try {
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.js',
+    import.meta.url,
+  ).toString();
+} catch {
+  // Fallback to CDN if local worker fails
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+}
 
 interface PdfViewerProps {
   data: AnalysisData;
@@ -79,6 +87,70 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   ]);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+
+  const highlightMap = useMemo(() => {
+    const map: { text: string; color: string }[] = [];
+    data.flags.forEach((item: any) => {
+      const color =
+        item.flag === "Red" ? "red" :
+          item.flag === "Yellow" ? "yellow" : "green";
+      map.push({ text: item.text.replace(/\s+/g, " "), color });
+    });
+    return map;
+  }, [data.flags]);
+  
+
+
+  const customTextRenderer = useCallback(
+    ({ str }: { str: string }) => {
+      if (!str.trim() || str.trim().length < 5) return str;
+
+      const normalizedSpan = str.replace(/\s+/g, " ").trim();
+
+      // Find ALL flags that contain this span
+      const matches = highlightMap.filter(({ text }) =>
+        text.includes(normalizedSpan)
+      );
+
+      if (matches.length === 0) return str;
+
+      // If only one match, use it
+      if (matches.length === 1) {
+        const { color } = matches[0];
+        const bg =
+          color === "red" ? "rgba(239,68,68,0.4)" :
+            color === "yellow" ? "rgba(234,179,8,0.4)" :
+              "rgba(34,197,94,0.4)";
+        return `<mark style="background:${bg};color:inherit;">${str}</mark>`;
+      }
+
+      // Multiple flags contain this span — pick the one where
+      // the span appears DEEPEST inside the text (farthest from edges)
+      // This avoids matching overlap zones at start/end of flag texts
+      let bestMatch = matches[0];
+      let bestScore = -1;
+
+      matches.forEach(({ text, color }) => {
+        const idx = text.indexOf(normalizedSpan);
+        const distanceFromStart = idx;
+        const distanceFromEnd = text.length - (idx + normalizedSpan.length);
+        // Score = how far the match is from BOTH edges (higher = more central)
+        const score = Math.min(distanceFromStart, distanceFromEnd);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = { text, color };
+        }
+      });
+
+      const bg =
+        bestMatch.color === "red" ? "rgba(239,68,68,0.4)" :
+          bestMatch.color === "yellow" ? "rgba(234,179,8,0.4)" :
+            "rgba(34,197,94,0.4)";
+      return `<mark style="background:${bg};color:inherit;">${str}</mark>`;
+    },
+    [highlightMap]
+  );
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -148,126 +220,85 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     }));
 
 
-  // put this inside your PdfViewer component (assumes react-pdf is already set up)
-  // const dummyHighlights = [
-  //   { text: "in preparing the financial statements", color: "red" },
-  //   {
-  //     text: "the audit or otherwise appears to be materially misstated.",
-  //     color: "yellow",
-  //   },
-  //   {
-  //     text: "the requirements of Companies Act, 2017 (XIX of 2017)",
-  //     color: "green",
-  //   },
-  //   {
-  //     text: "misstatement, whether due to fraud or error, and to issue an auditors’ report that includes our opinion.",
-  //     color: "red",
-  //   },
 
-  //   {
-  //     text: "Conclude on the appropriateness of management’s use of the going concern basis of accounting",
-  //     color: "yellow",
-  //   },
-  //   {
-  //     text: "Evaluate the overall presentation, structure and content of the financial statements",
-  //     color: "green",
-  //   },
-  //   {
-  //     text: "no zakat deductible at source under the Zakat and Ushr Ordinance, 1980 (XVIII of 1980)",
-  //     color: "red",
-  //   },
-  // ];
-
-
-  // const dummyHighlights = data.flags.map((item: any) => ({
-  //   // text: item.text,
-  //   // ✅ New — take first meaningful phrase (40-60 chars), more likely to be in one span
-  //   text: item.text.trim().slice(0, 50).split('\n')[0].trim(),
-  //   color:
-  //     item.flag === "Red"
-  //       ? "red"
-  //       : item.flag === "Yellow"
-  //         ? "yellow"
-  //         : "green"
-  // }));
 
 
   // Build highlights from each line of each flag
-  const dummyHighlights = data.flags.flatMap((item: any) => {
-    const color =
-      item.flag === "Red" ? "red" :
-        item.flag === "Yellow" ? "yellow" : "green";
+  // const dummyHighlights = data.flags.flatMap((item: any) => {
+  //   const color =
+  //     item.flag === "Red" ? "red" :
+  //       item.flag === "Yellow" ? "yellow" : "green";
 
-    return item.text
-      .split('\n')                          // split by newline
-      .map((line: string) => line.trim())   // trim whitespace
-      .filter((line: string) => line.length > 20) // skip tiny fragments
-      .map((line: string) => ({
-        text: line,         // first 60 chars of each line
-        color
-      }));
-  });
-
-
-  function highlightText() {
-    const bgFor = (color: string) => {
-      switch (color) {
-        case "red":
-          return "hsl(0 84% 60% / 0.35)";
-        case "yellow":
-          return "rgb(234 179 8 / 0.35)";
-        case "green":
-          return "rgb(34 197 94 / 0.35)";
-        default:
-          return "rgba(255, 255, 0, 0.3)";
-      }
-    };
-
-    const textLayers = document.querySelectorAll(
-      ".react-pdf__Page__textContent"
-    );
-    if (!textLayers.length) return;
-
-    textLayers.forEach((layer) => {
-      const spans = Array.from(layer.querySelectorAll("span"));
-      spans.forEach((span) => {
-        if (!span.textContent || span.dataset.hlProcessed === "true") return;
-        let spanText = span.textContent;
-
-        dummyHighlights.forEach(({ text, color }) => {
-          const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const regex = new RegExp(escaped, "gi");
-          if (regex.test(spanText)) {
-            const replaced = spanText.replace(regex, (match) => {
-              const bg = bgFor(color);
-              return `<mark style="background:${bg}; color:inherit; padding:0 2px; border-radius:2px; mix-blend-mode:multiply; pointer-events:none;">${match}</mark>`;
-            });
-            span.innerHTML = replaced;
-            span.dataset.hlProcessed = "true"; // prevent reapplying multiple times
-            spanText = span.textContent || "";
-          }
-        });
-      });
-    });
-  }
+  //   return item.text
+  //     .split('\n')                          // split by newline
+  //     .map((line: string) => line.trim())   // trim whitespace
+  //     .filter((line: string) => line.length > 20) // skip tiny fragments
+  //     .map((line: string) => ({
+  //       text: line,         // first 60 chars of each line
+  //       color
+  //     }));
+  // });
 
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      highlightText();
-    });
+  // function highlightText() {
+  //   const bgFor = (color: string) => {
+  //     switch (color) {
+  //       case "red":
+  //         return "hsl(0 84% 60% / 0.35)";
+  //       case "yellow":
+  //         return "rgb(234 179 8 / 0.35)";
+  //       case "green":
+  //         return "rgb(34 197 94 / 0.35)";
+  //       default:
+  //         return "rgba(255, 255, 0, 0.3)";
+  //     }
+  //   };
 
-    // Watch *all* PDF documents (normal + fullscreen)
-    const containers = document.querySelectorAll(".react-pdf__Document");
-    containers.forEach((container) => {
-      observer.observe(container, { childList: true, subtree: true });
-    });
+  //   const textLayers = document.querySelectorAll(
+  //     ".react-pdf__Page__textContent"
+  //   );
+  //   if (!textLayers.length) return;
 
-    // Initial highlight on mount
-    highlightText();
+  //   textLayers.forEach((layer) => {
+  //     const spans = Array.from(layer.querySelectorAll("span"));
+  //     spans.forEach((span) => {
+  //       if (!span.textContent || span.dataset.hlProcessed === "true") return;
+  //       let spanText = span.textContent;
 
-    return () => observer.disconnect();
-  }, [pageNumber, scale, isFullscreen]);
+  //       dummyHighlights.forEach(({ text, color }) => {
+  //         const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  //         const regex = new RegExp(escaped, "gi");
+  //         if (regex.test(spanText)) {
+  //           const replaced = spanText.replace(regex, (match) => {
+  //             const bg = bgFor(color);
+  //             return `<mark style="background:${bg}; color:inherit; padding:0 2px; border-radius:2px; mix-blend-mode:multiply; pointer-events:none;">${match}</mark>`;
+  //           });
+  //           span.innerHTML = replaced;
+  //           span.dataset.hlProcessed = "true"; // prevent reapplying multiple times
+  //           spanText = span.textContent || "";
+  //         }
+  //       });
+  //     });
+  //   });
+  // }
+
+
+  // useEffect(() => {
+  //   const observer = new MutationObserver(() => {
+  //     highlightText();
+  //   });
+
+  //   // Watch *all* PDF documents (normal + fullscreen)
+  //   const containers = document.querySelectorAll(".react-pdf__Document");
+  //   containers.forEach((container) => {
+  //     observer.observe(container, { childList: true, subtree: true });
+  //   });
+
+  //   // Initial highlight on mount
+  //   highlightText();
+
+  //   return () => observer.disconnect();
+  // }, [pageNumber, scale, isFullscreen]);
 
   // if (isFullscreen) {
   //   setTimeout(highlightText, 800);
@@ -429,12 +460,20 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                 </div>}
               >
 
-                <Page
+                {/* <Page
                   pageNumber={pageNumber}
                   scale={scale}
                   // onLoadSuccess={onPageLoadSuccess}
                   className="shadow-lg border border-border/20"
+                /> */}
+
+                <Page
+                  pageNumber={pageNumber}
+                  scale={scale}
+                  customTextRenderer={customTextRenderer}
+                  className="shadow-lg border border-border/20"
                 />
+
               </Document>
 
 
@@ -544,14 +583,25 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
                   error={<div className="flex items-center justify-center h-64"><div className="text-destructive">Failed to load PDF</div></div>}
                 >
                   {Array.from({ length: numPages || 0 }).map((_, index) => (
+                    // <Page
+                    //   key={`page_${index + 1}`}
+                    //   pageNumber={index + 1}
+                    //   scale={scale}
+                    //   renderTextLayer
+                    //   renderAnnotationLayer
+                    //   className="shadow-lg border border-border/20 mb-4"
+                    // />
+
                     <Page
                       key={`page_${index + 1}`}
                       pageNumber={index + 1}
                       scale={scale}
                       renderTextLayer
                       renderAnnotationLayer
+                      customTextRenderer={customTextRenderer}
                       className="shadow-lg border border-border/20 mb-4"
                     />
+
                   ))}
                 </Document>
 
